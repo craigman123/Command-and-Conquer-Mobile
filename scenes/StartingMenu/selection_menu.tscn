@@ -1,3 +1,72 @@
 [gd_scene format=3 uid="uid://egyot3ve0r3v"]
 
-[node name="selection_menu" type="Node2D" unique_id=1986218587]
+[ext_resource type="Script" uid="uid://dw8c12h76i5qr" path="res://scripts/selection_menu.gd" id="1_msn1l"]
+[ext_resource type="FontFile" uid="uid://lpnehwjndgts" path="res://assets/fonts/Orbitron-Bold.ttf" id="3_l14jk"]
+
+[node name="selection_menu" type="Control" unique_id=628007830]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="SelectionMenu" type="Control" parent="." unique_id=2027852158]
+anchors_preset = 0
+offset_right = 1152.0
+offset_bottom = 646.0
+script = ExtResource("1_msn1l")
+
+[node name="ModeMenu" type="VBoxContainer" parent="SelectionMenu" unique_id=964611371]
+layout_mode = 0
+offset_left = 15.0
+offset_top = 340.0
+offset_right = 325.0
+offset_bottom = 632.0
+
+[node name="SkirmishButton" type="Button" parent="SelectionMenu/ModeMenu" unique_id=1381996758]
+custom_minimum_size = Vector2(300, 70)
+layout_mode = 2
+theme_override_colors/font_hover_color = Color(0.9490196, 0.9490196, 0.29411766, 1)
+theme_override_fonts/font = ExtResource("3_l14jk")
+theme_override_font_sizes/font_size = 25
+text = "SKIRMISH"
+
+[node name="SinglePlayButton" type="Button" parent="SelectionMenu/ModeMenu" unique_id=1546890760]
+custom_minimum_size = Vector2(300, 70)
+layout_mode = 2
+theme_override_colors/font_hover_color = Color(0.9490196, 0.9490196, 0.29411766, 1)
+theme_override_fonts/font = ExtResource("3_l14jk")
+theme_override_font_sizes/font_size = 25
+text = "SINGLE"
+
+[node name="MultiplayerButton" type="Button" parent="SelectionMenu/ModeMenu" unique_id=1691319491]
+custom_minimum_size = Vector2(300, 70)
+layout_mode = 2
+theme_override_colors/font_hover_color = Color(0.9490196, 0.9490196, 0.29411766, 1)
+theme_override_fonts/font = ExtResource("3_l14jk")
+theme_override_font_sizes/font_size = 25
+text = "MULTIPLAYER"
+
+[node name="ModsButton" type="Button" parent="SelectionMenu/ModeMenu" unique_id=1246397590]
+custom_minimum_size = Vector2(300, 70)
+layout_mode = 2
+theme_override_colors/font_hover_color = Color(0.9490196, 0.9490196, 0.29411766, 1)
+theme_override_fonts/font = ExtResource("3_l14jk")
+theme_override_font_sizes/font_size = 25
+text = "MODS"
+
+[node name="VBoxContainer" type="VBoxContainer" parent="SelectionMenu" unique_id=788258606]
+layout_mode = 1
+offset_left = 25.0
+offset_top = 21.0
+offset_right = 145.0
+offset_bottom = 69.0
+alignment = 1
+
+[node name="BackButton" type="Button" parent="SelectionMenu/VBoxContainer" unique_id=464357396]
+layout_mode = 2
+theme_override_colors/font_hover_color = Color(0.9490196, 0.9490196, 0.29411766, 1)
+theme_override_fonts/font = ExtResource("3_l14jk")
+theme_override_font_sizes/font_size = 22
+text = "<<<"

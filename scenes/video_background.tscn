@@ -1,0 +1,36 @@
+[gd_scene format=3 uid="uid://biex5u1pwfv2q"]
+
+[ext_resource type="Script" uid="uid://dg34vr5tjgxq6" path="res://scripts/video_background.gd" id="1_m0n6p"]
+[ext_resource type="VideoStream" uid="uid://cjy2rm8hmnvi6" path="res://assets/video/intro_peaceful.ogv" id="2_5a1dy"]
+[ext_resource type="VideoStream" uid="uid://qcashlshkqtc" path="res://assets/video/start_menu_bg.ogv" id="3_80d0j"]
+
+[node name="VideoBackground" type="CanvasLayer" unique_id=1152897347]
+layer = -10
+script = ExtResource("1_m0n6p")
+
+[node name="VideoContainer" type="AspectRatioContainer" parent="." unique_id=600006032]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 1.0
+offset_top = 1.0
+offset_right = -2.0
+offset_bottom = 2.0
+grow_horizontal = 2
+grow_vertical = 2
+ratio = 1.7778
+stretch_mode = 3
+
+[node name="IntroVideo" type="VideoStreamPlayer" parent="VideoContainer" unique_id=1345085147]
+layout_mode = 2
+stream = ExtResource("2_5a1dy")
+volume_db = -5.0
+autoplay = true
+expand = true
+
+[node name="LoopVideo" type="VideoStreamPlayer" parent="VideoContainer" unique_id=1144562039]
+layout_mode = 2
+stream = ExtResource("3_80d0j")
+volume_db = 5.0
+expand = true
+loop = true

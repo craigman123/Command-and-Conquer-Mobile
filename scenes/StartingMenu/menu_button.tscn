@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://8uq2qksdo06u"]
+
+[ext_resource type="FontFile" uid="uid://crjjfhoh1lfke" path="res://assets/fonts/Orbitron-Regular.ttf" id="1_2u5xh"]
+
+[node name="PlayButton" type="Button" unique_id=2035717468]
+custom_minimum_size = Vector2(300, 70)
+theme_override_colors/font_hover_color = Color(0.9490196, 0.9490196, 0.29411766, 1)
+theme_override_fonts/font = ExtResource("1_2u5xh")
+theme_override_font_sizes/font_size = 25
+text = "PLAY"

@@ -13,7 +13,14 @@ config_version=5
 config/name="Command and Conquer Mobile"
 run/main_scene="uid://bae0ta3tu4vo6"
 config/features=PackedStringArray("4.7", "GL Compatibility")
-config/icon="res://icon.svg"
+config/icon="uid://b4lpy8uu6ti2k"
+
+[autoload]
+
+MusicManager="*uid://blxbetbkljqt6"
+VideoBackground="*uid://biex5u1pwfv2q"
+TextScrambler="*uid://buc1hsyqblo37"
+UISound="*uid://ncouxosjwly0"
 
 [display]
 

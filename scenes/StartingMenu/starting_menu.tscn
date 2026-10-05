@@ -1,84 +1,83 @@
 [gd_scene format=3 uid="uid://bae0ta3tu4vo6"]
 
-[ext_resource type="VideoStream" uid="uid://qcashlshkqtc" path="res://assets/video/start_menu_bg.ogv" id="1_3q3hm"]
-[ext_resource type="Script" uid="uid://d02efknc2ro4b" path="res://scenes/StartingMenu/main_menu.gd" id="1_cgqdf"]
-[ext_resource type="FontFile" uid="uid://crjjfhoh1lfke" path="res://assets/fonts/Orbitron-Regular.ttf" id="3_axec0"]
-[ext_resource type="AudioStream" uid="uid://be6vghblby4sy" path="res://assets/sounds/hover/menu_hover.mp3" id="4_ov0yd"]
-[ext_resource type="AudioStream" uid="uid://dtw6bmu5s3ytt" path="res://assets/sounds/select/menu_select.mp3" id="5_scgwm"]
+[ext_resource type="Script" uid="uid://d02efknc2ro4b" path="res://scripts/main_menu.gd" id="1_cgqdf"]
+[ext_resource type="FontFile" uid="uid://lpnehwjndgts" path="res://assets/fonts/Orbitron-Bold.ttf" id="2_jcs2p"]
 
-[node name="StartingMenu" type="Node2D" unique_id=838345626]
+[node name="StartingMenu" type="Control" unique_id=728600316]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -1.0
+offset_right = 1.0
+offset_bottom = -1.0
+grow_horizontal = 2
+grow_vertical = 2
 
 [node name="MainMenu" type="Control" parent="." unique_id=189459994]
-custom_minimum_size = Vector2(400, 0)
-layout_mode = 3
-anchors_preset = 0
-offset_left = -18.0
-offset_top = -11.0
-offset_right = 18.0
-offset_bottom = 11.0
-script = ExtResource("1_cgqdf")
-
-[node name="VideoStreamPlayer" type="VideoStreamPlayer" parent="MainMenu" unique_id=860145687]
 layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -180.0
-offset_top = 2.0
-offset_right = 983.0
-offset_bottom = 654.0
-stream = ExtResource("1_3q3hm")
-autoplay = true
-expand = true
-loop = true
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_cgqdf")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MainMenu" unique_id=2017360347]
 layout_mode = 1
 anchors_preset = 4
 anchor_top = 0.5
 anchor_bottom = 0.5
-offset_left = 48.0
-offset_top = 172.0
-offset_right = 259.0
-offset_bottom = 621.5
+offset_left = 15.0
+offset_top = -132.0
+offset_right = 325.0
+offset_bottom = 318.5
 grow_vertical = 2
 
-[node name="PlayButton" type="Button" parent="MainMenu/VBoxContainer" unique_id=24203624]
-custom_minimum_size = Vector2(300, 80)
+[node name="PlayButton" type="Button" parent="MainMenu/VBoxContainer" unique_id=1655431381]
+custom_minimum_size = Vector2(300, 70)
 layout_mode = 2
 theme_override_colors/font_hover_color = Color(0.9490196, 0.9490196, 0.29411766, 1)
-theme_override_fonts/font = ExtResource("3_axec0")
+theme_override_fonts/font = ExtResource("2_jcs2p")
 theme_override_font_sizes/font_size = 25
 text = "PLAY"
 
-[node name="SettingsButton" type="Button" parent="MainMenu/VBoxContainer" unique_id=1653639755]
-custom_minimum_size = Vector2(300, 80)
+[node name="GeneralsButton" type="Button" parent="MainMenu/VBoxContainer" unique_id=633518425]
+custom_minimum_size = Vector2(300, 70)
 layout_mode = 2
 theme_override_colors/font_hover_color = Color(0.9490196, 0.9490196, 0.29411766, 1)
-theme_override_fonts/font = ExtResource("3_axec0")
+theme_override_fonts/font = ExtResource("2_jcs2p")
+theme_override_font_sizes/font_size = 25
+text = "GENERALS"
+
+[node name="SettingsButton" type="Button" parent="MainMenu/VBoxContainer" unique_id=1653639755]
+custom_minimum_size = Vector2(300, 70)
+layout_mode = 2
+theme_override_colors/font_hover_color = Color(0.9490196, 0.9490196, 0.29411766, 1)
+theme_override_fonts/font = ExtResource("2_jcs2p")
 theme_override_font_sizes/font_size = 25
 text = "SETTINGS"
 
-[node name="CreditsButton" type="Button" parent="MainMenu/VBoxContainer" unique_id=1094107967]
-custom_minimum_size = Vector2(300, 80)
+[node name="ModsButton" type="Button" parent="MainMenu/VBoxContainer" unique_id=2132038165]
+custom_minimum_size = Vector2(300, 70)
 layout_mode = 2
 theme_override_colors/font_hover_color = Color(0.9490196, 0.9490196, 0.29411766, 1)
-theme_override_fonts/font = ExtResource("3_axec0")
+theme_override_fonts/font = ExtResource("2_jcs2p")
+theme_override_font_sizes/font_size = 25
+text = "MODS"
+
+[node name="CreditsButton" type="Button" parent="MainMenu/VBoxContainer" unique_id=1094107967]
+custom_minimum_size = Vector2(300, 70)
+layout_mode = 2
+theme_override_colors/font_hover_color = Color(0.9490196, 0.9490196, 0.29411766, 1)
+theme_override_fonts/font = ExtResource("2_jcs2p")
 theme_override_font_sizes/font_size = 25
 text = "CREDITS"
 
 [node name="QuitButton" type="Button" parent="MainMenu/VBoxContainer" unique_id=790725886]
-custom_minimum_size = Vector2(300, 80)
+custom_minimum_size = Vector2(300, 70)
 layout_mode = 2
 theme_override_colors/font_hover_color = Color(0.9490196, 0.9490196, 0.29411766, 1)
-theme_override_fonts/font = ExtResource("3_axec0")
+theme_override_fonts/font = ExtResource("2_jcs2p")
 theme_override_font_sizes/font_size = 25
 text = "QUIT"
-
-[node name="HoverSound" type="AudioStreamPlayer" parent="MainMenu" unique_id=1057681693]
-stream = ExtResource("4_ov0yd")
-
-[node name="SelectionSound" type="AudioStreamPlayer" parent="MainMenu" unique_id=208405385]
-stream = ExtResource("5_scgwm")

@@ -1,0 +1,414 @@
+{
+  "chapters": [
+	{
+	  "id": "chapter1",
+	  "name": "Chapter 1",
+	  "image": "res://assets/sprites/SkirmishChapterImages/chapter1.png",
+	  "episodes": [
+		{
+		  "name": "Prologue",
+		  "summary": "Briefing text for chapter 1, episode 1.",
+		  "image": "",
+		  "map": ""
+		},
+		{
+		  "name": "Hold the Line",
+		  "summary": "Briefing text for chapter 1, episode 2.",
+		  "image": "",
+		  "map": "",
+		  "locked": true
+		},
+		{
+		  "name": "Untitled",
+		  "summary": "Briefing text for chapter 1, episode 3.",
+		  "image": "",
+		  "map": "",
+		  "locked": true
+		},
+		{
+		  "name": "Untitled",
+		  "summary": "Briefing text for chapter 1, episode 4.",
+		  "image": "",
+		  "map": "",
+		  "locked": true
+		},
+		{
+		  "name": "Untitled",
+		  "summary": "Briefing text for chapter 1, episode 5.",
+		  "image": "",
+		  "map": "",
+		  "locked": true
+		},
+		{
+		  "name": "Untitled",
+		  "summary": "Briefing text for chapter 1, episode 6.",
+		  "image": "",
+		  "map": "",
+		  "locked": true
+		}
+	  ]
+	},
+	{
+	  "id": "chapter2",
+	  "name": "Chapter 2",
+	  "image": "",
+	  "episodes": [
+		{
+		  "name": "Untitled",
+		  "summary": "Briefing text for chapter 2, episode 1.",
+		  "image": "",
+		  "map": ""
+		},
+		{
+		  "name": "Untitled",
+		  "summary": "Briefing text for chapter 2, episode 2.",
+		  "image": "",
+		  "map": "",
+		  "locked": true
+		},
+		{
+		  "name": "Untitled",
+		  "summary": "Briefing text for chapter 2, episode 3.",
+		  "image": "",
+		  "map": "",
+		  "locked": true
+		},
+		{
+		  "name": "Untitled",
+		  "summary": "Briefing text for chapter 2, episode 4.",
+		  "image": "",
+		  "map": "",
+		  "locked": true
+		}
+	  ]
+	},
+	{
+	  "id": "chapter3",
+	  "name": "Chapter 3",
+	  "image": "",
+	  "episodes": [
+		{
+		  "name": "Untitled",
+		  "summary": "Briefing text for chapter 3, episode 1.",
+		  "image": "",
+		  "map": ""
+		},
+		{
+		  "name": "Untitled",
+		  "summary": "Briefing text for chapter 3, episode 2.",
+		  "image": "",
+		  "map": "",
+		  "locked": true
+		},
+		{
+		  "name": "Untitled",
+		  "summary": "Briefing text for chapter 3, episode 3.",
+		  "image": "",
+		  "map": "",
+		  "locked": true
+		},
+		{
+		  "name": "Untitled",
+		  "summary": "Briefing text for chapter 3, episode 4.",
+		  "image": "",
+		  "map": "",
+		  "locked": true
+		},
+		{
+		  "name": "Untitled",
+		  "summary": "Briefing text for chapter 3, episode 5.",
+		  "image": "",
+		  "map": "",
+		  "locked": true
+		},
+		{
+		  "name": "Untitled",
+		  "summary": "Briefing text for chapter 3, episode 6.",
+		  "image": "",
+		  "map": "",
+		  "locked": true
+		},
+		{
+		  "name": "Untitled",
+		  "summary": "Briefing text for chapter 3, episode 7.",
+		  "image": "",
+		  "map": "",
+		  "locked": true
+		}
+	  ]
+	},
+	{
+	  "id": "chapter4",
+	  "name": "Chapter 4",
+	  "image": "",
+	  "episodes": [
+		{
+		  "name": "Untitled",
+		  "summary": "Briefing text for chapter 4, episode 1.",
+		  "image": "",
+		  "map": ""
+		},
+		{
+		  "name": "Untitled",
+		  "summary": "Briefing text for chapter 4, episode 2.",
+		  "image": "",
+		  "map": "",
+		  "locked": true
+		}
+	  ]
+	},
+	{
+	  "id": "chapter5",
+	  "name": "Chapter 5",
+	  "image": "",
+	  "episodes": [
+		{
+		  "name": "Untitled",
+		  "summary": "Briefing text for chapter 5, episode 1.",
+		  "image": "",
+		  "map": ""
+		},
+		{
+		  "name": "Untitled",
+		  "summary": "Briefing text for chapter 5, episode 2.",
+		  "image": "",
+		  "map": "",
+		  "locked": true
+		},
+		{
+		  "name": "Untitled",
+		  "summary": "Briefing text for chapter 5, episode 3.",
+		  "image": "",
+		  "map": "",
+		  "locked": true
+		}
+	  ]
+	},
+	{
+	  "id": "chapter6",
+	  "name": "Chapter 6",
+	  "image": "",
+	  "episodes": [
+		{
+		  "name": "Untitled",
+		  "summary": "Briefing text for chapter 6, episode 1.",
+		  "image": "",
+		  "map": ""
+		},
+		{
+		  "name": "Untitled",
+		  "summary": "Briefing text for chapter 6, episode 2.",
+		  "image": "",
+		  "map": "",
+		  "locked": true
+		},
+		{
+		  "name": "Untitled",
+		  "summary": "Briefing text for chapter 6, episode 3.",
+		  "image": "",
+		  "map": "",
+		  "locked": true
+		},
+		{
+		  "name": "Untitled",
+		  "summary": "Briefing text for chapter 6, episode 4.",
+		  "image": "",
+		  "map": "",
+		  "locked": true
+		},
+		{
+		  "name": "Untitled",
+		  "summary": "Briefing text for chapter 6, episode 5.",
+		  "image": "",
+		  "map": "",
+		  "locked": true
+		},
+		{
+		  "name": "Untitled",
+		  "summary": "Briefing text for chapter 6, episode 6.",
+		  "image": "",
+		  "map": "",
+		  "locked": true
+		},
+		{
+		  "name": "Untitled",
+		  "summary": "Briefing text for chapter 6, episode 7.",
+		  "image": "",
+		  "map": "",
+		  "locked": true
+		},
+		{
+		  "name": "Untitled",
+		  "summary": "Briefing text for chapter 6, episode 8.",
+		  "image": "",
+		  "map": "",
+		  "locked": true
+		}
+	  ]
+	},
+	{
+	  "id": "chapter7",
+	  "name": "Chapter 7",
+	  "image": "",
+	  "episodes": [
+		{
+		  "name": "Untitled",
+		  "summary": "Briefing text for chapter 7, episode 1.",
+		  "image": "",
+		  "map": ""
+		},
+		{
+		  "name": "Untitled",
+		  "summary": "Briefing text for chapter 7, episode 2.",
+		  "image": "",
+		  "map": "",
+		  "locked": true
+		},
+		{
+		  "name": "Untitled",
+		  "summary": "Briefing text for chapter 7, episode 3.",
+		  "image": "",
+		  "map": "",
+		  "locked": true
+		},
+		{
+		  "name": "Untitled",
+		  "summary": "Briefing text for chapter 7, episode 4.",
+		  "image": "",
+		  "map": "",
+		  "locked": true
+		}
+	  ]
+	},
+	{
+	  "id": "chapter8",
+	  "name": "Chapter 8",
+	  "image": "",
+	  "episodes": [
+		{
+		  "name": "Untitled",
+		  "summary": "Briefing text for chapter 8, episode 1.",
+		  "image": "",
+		  "map": ""
+		},
+		{
+		  "name": "Untitled",
+		  "summary": "Briefing text for chapter 8, episode 2.",
+		  "image": "",
+		  "map": "",
+		  "locked": true
+		},
+		{
+		  "name": "Untitled",
+		  "summary": "Briefing text for chapter 8, episode 3.",
+		  "image": "",
+		  "map": "",
+		  "locked": true
+		},
+		{
+		  "name": "Untitled",
+		  "summary": "Briefing text for chapter 8, episode 4.",
+		  "image": "",
+		  "map": "",
+		  "locked": true
+		}
+	  ]
+	},
+	{
+	  "id": "chapter9",
+	  "name": "Chapter 9",
+	  "image": "",
+	  "episodes": [
+		{
+		  "name": "Untitled",
+		  "summary": "Briefing text for chapter 9, episode 1.",
+		  "image": "",
+		  "map": ""
+		},
+		{
+		  "name": "Untitled",
+		  "summary": "Briefing text for chapter 9, episode 2.",
+		  "image": "",
+		  "map": "",
+		  "locked": true
+		},
+		{
+		  "name": "Untitled",
+		  "summary": "Briefing text for chapter 9, episode 3.",
+		  "image": "",
+		  "map": "",
+		  "locked": true
+		},
+		{
+		  "name": "Untitled",
+		  "summary": "Briefing text for chapter 9, episode 4.",
+		  "image": "",
+		  "map": "",
+		  "locked": true
+		},
+		{
+		  "name": "Untitled",
+		  "summary": "Briefing text for chapter 9, episode 5.",
+		  "image": "",
+		  "map": "",
+		  "locked": true
+		},
+		{
+		  "name": "Untitled",
+		  "summary": "Briefing text for chapter 9, episode 6.",
+		  "image": "",
+		  "map": "",
+		  "locked": true
+		},
+		{
+		  "name": "Untitled",
+		  "summary": "Briefing text for chapter 9, episode 7.",
+		  "image": "",
+		  "map": "",
+		  "locked": true
+		}
+	  ]
+	},
+	{
+	  "id": "chapter10",
+	  "name": "Chapter 10",
+	  "image": "",
+	  "episodes": [
+		{
+		  "name": "Untitled",
+		  "summary": "Briefing text for chapter 10, episode 1.",
+		  "image": "",
+		  "map": ""
+		},
+		{
+		  "name": "Untitled",
+		  "summary": "Briefing text for chapter 10, episode 2.",
+		  "image": "",
+		  "map": "",
+		  "locked": true
+		},
+		{
+		  "name": "Untitled",
+		  "summary": "Briefing text for chapter 10, episode 3.",
+		  "image": "",
+		  "map": "",
+		  "locked": true
+		},
+		{
+		  "name": "Untitled",
+		  "summary": "Briefing text for chapter 10, episode 4.",
+		  "image": "",
+		  "map": "",
+		  "locked": true
+		},
+		{
+		  "name": "Untitled",
+		  "summary": "Briefing text for chapter 10, episode 5.",
+		  "image": "",
+		  "map": "",
+		  "locked": true
+		}
+	  ]
+	}
+  ]
+}

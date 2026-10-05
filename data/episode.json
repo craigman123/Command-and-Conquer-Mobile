@@ -1,0 +1,37 @@
+{
+  "1": {
+	"name": "Chapter 1",
+	"image": "res://assets/sprites/SkirmishChapterImages/chapter1.png",
+	"episodes": [
+	  {
+		"episode": "1",
+		"name": "Opening Moves",
+		"summary": "Briefing text for the first mission.",
+		"image": "res://assets/sprites/SkirmishChapterImages/ch1_ep1.png",
+		"scene": "res://scenes/Game/Missions/ch1_ep1.tscn"
+	  },
+	  {
+		"episode": "2",
+		"name": "Hold the Line",
+		"summary": "Briefing text for the second mission.",
+		"image": "",
+		"scene": "res://scenes/Game/Missions/ch1_ep2.tscn",
+		"locked": true
+	  },
+	  {
+		"episode": "3",
+		"name": "Supply Run",
+		"summary": "The new third episode. Just add a block like this.",
+		"image": "",
+		"scene": "",
+		"locked": true
+	  }
+	]
+  },
+  "2": { 
+	"name": "Chapter 2", 
+	"image": "", 
+	"episodes": [
+		
+	] }
+}
