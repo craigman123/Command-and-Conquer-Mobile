@@ -130,7 +130,10 @@ func _on_play_pressed():
 	if session:
 		session.selected_episode = selected_episode
 		session.selected_map = map_path
-	get_tree().change_scene_to_file("res://scenes/Game/game_factory.tscn") # change to your match scene
+	VideoBackground.hide_background()
+	MusicManager.stop_music(1.0)
+	SceneLoader.next_scene = map_path
+	get_tree().change_scene_to_file("res://scenes/Game/loading_screen.tscn")
 
 
 func _on_back_pressed():

@@ -9,7 +9,7 @@
 		  "name": "Prologue",
 		  "summary": "Briefing text for chapter 1, episode 1.",
 		  "image": "",
-		  "map": ""
+		  "map": "res://scenes/Game/Skirmish/Chapters/Chapter1/test_map.tscn"
 		},
 		{
 		  "name": "Hold the Line",

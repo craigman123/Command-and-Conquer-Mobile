@@ -1,5 +1,46 @@
 [gd_scene format=3 uid="uid://35s7euetvxih"]
 
-[node name="Chapter1Episode1" type="Node3D" unique_id=644440109]
+[ext_resource type="Script" uid="uid://cu2jtc1dpqvd4" path="res://scenes/Game/Skirmish/Chapters/Chapter1/test_map.gd" id="1_pqm0p"]
+[ext_resource type="PackedScene" uid="uid://ddqdk1x8fhw3n" path="res://assets/models/Game/Tanks/tiger_tank.tscn" id="1_w8nfi"]
+[ext_resource type="Script" uid="uid://dhrf5u3s2j63e" path="res://scenes/Game/Skirmish/Chapters/Chapter1/rts_controller.gd" id="2_14o3w"]
+[ext_resource type="PackedScene" uid="uid://cytxka1e07ta8" path="res://scenes/Game/Camera/camera_rig.tscn" id="3_j7mim"]
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=614364753]
+[sub_resource type="NavigationMesh" id="NavigationMesh_mm1bc"]
+vertices = PackedVector3Array(-49.5, 0.5, -49.5, -49.5, 0.5, 49.5, 49.5, 0.5, 49.5, 49.5, 0.5, -49.5)
+polygons = [PackedInt32Array(3, 2, 0), PackedInt32Array(0, 2, 1)]
+geometry_parsed_geometry_type = 1
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_4kxuq"]
+albedo_color = Color(0.2901961, 0.4862745, 0.22745098, 1)
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_i57c6"]
+material = SubResource("StandardMaterial3D_4kxuq")
+size = Vector2(100, 100)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_mti6b"]
+size = Vector3(100, 1, 100)
+
+[node name="Chapter1Episode1" type="Node3D" unique_id=644440109]
+script = ExtResource("1_pqm0p")
+
+[node name="NavigationRegion3D" type="NavigationRegion3D" parent="." unique_id=99707862]
+navigation_mesh = SubResource("NavigationMesh_mm1bc")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D" unique_id=614364753]
+mesh = SubResource("PlaneMesh_i57c6")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="NavigationRegion3D" unique_id=1101723491]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/StaticBody3D" unique_id=677349977]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+shape = SubResource("BoxShape3D_mti6b")
+
+[node name="Tank" parent="NavigationRegion3D" unique_id=861627520 instance=ExtResource("1_w8nfi")]
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=13742696]
+transform = Transform3D(0.0618228, 0.59377176, -0.80225503, -0.01949948, 0.8043577, 0.59382534, 0.9978967, -0.02106839, 0.061305884, -5.1524286, 2.1725466, 0)
+
+[node name="Controller" type="Node" parent="." unique_id=1962173825]
+script = ExtResource("2_14o3w")
+
+[node name="CameraRig" parent="." unique_id=1703168091 instance=ExtResource("3_j7mim")]

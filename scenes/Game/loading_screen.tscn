@@ -1,0 +1,102 @@
+[gd_scene format=3 uid="uid://org1g44dt6fy"]
+
+[ext_resource type="VideoStream" uid="uid://cpjyb0gpfjgv" path="res://assets/sprites/SkirmishChapterImages/LoadingScreen/loading_screen.ogv" id="1_w4mdj"]
+
+[sub_resource type="GDScript" id="GDScript_w4mdj"]
+script/source = "extends Control
+
+const MIN_SHOW_SEC := 3.0
+
+@onready var video: VideoStreamPlayer = $VideoStreamPlayer
+@onready var bar: ProgressBar = $ProgressBar
+
+var target := \"\"
+var shown := 0.0
+var elapsed := 0.0
+var done := false
+
+func _ready():
+	bar.min_value = 0
+	bar.max_value = 100
+	bar.value = 0
+	video.finished.connect(video.play)
+	video.play()
+
+	target = SceneLoader.next_scene
+	if target == \"\":
+		push_warning(\"No scene to load\")
+		get_tree().change_scene_to_file(\"res://scenes/StartingMenu/selection_menu.tscn\")
+		return
+	ResourceLoader.load_threaded_request(target)
+
+func _process(delta):
+	if target == \"\" or done:
+		return
+	elapsed += delta
+
+	var progress := []
+	var status = ResourceLoader.load_threaded_get_status(target, progress)
+
+	if status == ResourceLoader.THREAD_LOAD_FAILED or status == ResourceLoader.THREAD_LOAD_INVALID_RESOURCE:
+		push_error(\"Failed to load \" + target)
+		done = true
+		get_tree().change_scene_to_file(\"res://scenes/StartingMenu/selection_menu.tscn\")
+		return
+
+	var real: float = 100.0 if status == ResourceLoader.THREAD_LOAD_LOADED else progress[0] * 100.0
+	shown = move_toward(shown, real, (100.0 / MIN_SHOW_SEC) * delta)
+	bar.value = shown
+
+	if status == ResourceLoader.THREAD_LOAD_LOADED and shown >= 100.0 and elapsed >= MIN_SHOW_SEC:
+		done = true
+		var packed = ResourceLoader.load_threaded_get(target)
+		get_tree().change_scene_to_packed(packed)
+"
+
+[node name="LoadingScreen" type="Control" unique_id=665973379]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = SubResource("GDScript_w4mdj")
+
+[node name="ColorRect" type="ColorRect" parent="." unique_id=1043973190]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 1)
+
+[node name="ProgressBar" type="ProgressBar" parent="." unique_id=699332706]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.032
+anchor_top = 0.87000006
+anchor_right = 0.966
+anchor_bottom = 0.91200006
+offset_left = 4.135998
+offset_top = -11.760071
+offset_right = 0.16796875
+offset_bottom = 0.023986816
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="VideoStreamPlayer" type="VideoStreamPlayer" parent="." unique_id=807764858]
+custom_minimum_size = Vector2(600, 350)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+grow_horizontal = 2
+grow_vertical = 2
+stream = ExtResource("1_w4mdj")
+volume_db = -80.0
+autoplay = true
+expand = true
+loop = true
