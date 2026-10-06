@@ -2,14 +2,13 @@
   "chapters": [
 	{
 	  "id": "chapter1",
-	  "name": "Chapter 1",
-	  "image": "res://assets/sprites/SkirmishChapterImages/chapter1.png",
+	  "name": "Chapter 1: Mission Easy",
 	  "episodes": [
 		{
 		  "name": "Prologue",
-		  "summary": "Briefing text for chapter 1, episode 1.",
-		  "image": "",
-		  "map": "res://scenes/Game/Skirmish/Chapters/Chapter1/test_map.tscn"
+		  "summary": "Protect 3 Convoys from terrorist and bandits, this convoy is carying radioative material called 'Technitium', if one convoy is destroyed it will kill any human being near it.",
+		  "image": "res://assets/images/Chapter1/episode1.jpg",
+		  "map": "res://scenes/Game/Skirmish/Chapters/Chapter1/map_prologue.scn"
 		},
 		{
 		  "name": "Hold the Line",

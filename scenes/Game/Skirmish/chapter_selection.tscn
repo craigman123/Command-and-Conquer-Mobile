@@ -3,15 +3,17 @@
 [ext_resource type="Script" uid="uid://gnmna0pxfia7" path="res://scripts/Skirmish/skirmish.gd" id="1_jn68u"]
 [ext_resource type="FontFile" uid="uid://lpnehwjndgts" path="res://assets/fonts/Orbitron-Bold.ttf" id="2_w6o5p"]
 [ext_resource type="VideoStream" uid="uid://cpjyb0gpfjgv" path="res://assets/sprites/SkirmishChapterImages/LoadingScreen/loading_screen.ogv" id="3_w6o5p"]
+[ext_resource type="PackedScene" uid="uid://drq348qignpas" path="res://assets/sprites/SkirmishChapterImages/OverlayImages/overlay_image.tscn" id="4_4hed1"]
 [ext_resource type="FontFile" uid="uid://sho3rh36g6r1" path="res://assets/fonts/Orbitron-ExtraBold.ttf" id="4_va8eh"]
-
-[sub_resource type="Theme" id="Theme_viafb"]
+[ext_resource type="PackedScene" uid="uid://csp3revj0tg8j" path="res://assets/sprites/SkirmishChapterImages/FallbackImages/fall_back_image.tscn" id="5_lkgjl"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_lkgjl"]
 bg_color = Color(0.18359056, 0.18359041, 0.18359047, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_4hed1"]
 bg_color = Color(0.18431373, 0.18431373, 0.18431373, 1)
+
+[sub_resource type="Theme" id="Theme_viafb"]
 
 [node name="GeneralsSelection" type="Control" unique_id=1918881244]
 layout_mode = 3
@@ -38,9 +40,14 @@ theme_override_constants/margin_top = 16
 theme_override_constants/margin_right = 16
 theme_override_constants/margin_bottom = 16
 
-[node name="SummaryText" type="RichTextLabel" parent="Skirmish/PanelContainer/MarginContainer" unique_id=152466783]
+[node name="ScrollContainer" type="ScrollContainer" parent="Skirmish/PanelContainer/MarginContainer" unique_id=53010177]
+layout_mode = 2
+
+[node name="SummaryText" type="RichTextLabel" parent="Skirmish/PanelContainer/MarginContainer/ScrollContainer" unique_id=152466783]
 unique_name_in_owner = true
 layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
 bbcode_enabled = true
 fit_content = true
 
@@ -58,47 +65,6 @@ theme_override_colors/font_hover_color = Color(0.9490196, 0.9490196, 0.29411766,
 theme_override_fonts/font = ExtResource("2_w6o5p")
 theme_override_font_sizes/font_size = 22
 text = "<<<"
-
-[node name="ChapterImage" type="TextureRect" parent="Skirmish" unique_id=274256575]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.40100002
-anchor_top = 0.020000001
-anchor_right = 0.98700005
-anchor_bottom = 0.665
-offset_left = 0.047973633
-offset_top = 0.03999901
-offset_right = -0.024047852
-offset_bottom = 0.07998657
-theme = SubResource("Theme_viafb")
-expand_mode = 1
-stretch_mode = 6
-
-[node name="ColorRect" type="ColorRect" parent="Skirmish/ChapterImage" unique_id=1800288022]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -5.0
-grow_horizontal = 2
-grow_vertical = 2
-color = Color(0, 0, 0, 1)
-
-[node name="LoadingVideo" type="VideoStreamPlayer" parent="Skirmish/ChapterImage" unique_id=630029450]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -9.0
-offset_top = -2.0
-offset_right = 1.0
-offset_bottom = 3.0
-grow_horizontal = 2
-grow_vertical = 2
-stream = ExtResource("3_w6o5p")
-volume_db = -80.0
-expand = true
-loop = true
 
 [node name="ChaptersContainer" type="ScrollContainer" parent="Skirmish" unique_id=316308238]
 layout_mode = 1
@@ -155,3 +121,68 @@ grow_horizontal = 2
 grow_vertical = 2
 expand_mode = 1
 stretch_mode = 6
+
+[node name="ColorRect2" type="ColorRect" parent="Skirmish" unique_id=1800288022]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 455.0
+offset_top = 13.0
+offset_right = -20.0
+offset_bottom = -217.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.056291588, 0.056291603, 0.056291595, 1)
+
+[node name="OverlayImage" parent="Skirmish/ColorRect2" unique_id=9898962 instance=ExtResource("4_4hed1")]
+layout_mode = 1
+anchor_left = 0.14500001
+anchor_top = 0.15100001
+anchor_right = 0.86100006
+anchor_bottom = 0.837
+offset_left = -0.16500854
+offset_top = -0.118003845
+offset_right = 0.10296631
+offset_bottom = 0.13400269
+
+[node name="ChapterImage" type="TextureRect" parent="Skirmish/ColorRect2" unique_id=274256575]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = SubResource("Theme_viafb")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="LoadingVideo" type="VideoStreamPlayer" parent="Skirmish/ColorRect2" unique_id=630029450]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 182.0
+offset_top = 60.0
+offset_right = -170.0
+offset_bottom = -125.0
+grow_horizontal = 2
+grow_vertical = 2
+stream = ExtResource("3_w6o5p")
+volume_db = -80.0
+expand = true
+loop = true
+
+[node name="FallBackImage" parent="Skirmish/ColorRect2" unique_id=29707249 instance=ExtResource("5_lkgjl")]
+visible = false
+layout_mode = 1
+anchor_left = 0.165
+anchor_top = 0.13900001
+anchor_right = 0.83900005
+anchor_bottom = 0.73700005
+offset_left = 0.29499817
+offset_top = -0.102005005
+offset_right = -0.0030517578
+offset_bottom = -0.06600952
+grow_horizontal = 1
+grow_vertical = 1

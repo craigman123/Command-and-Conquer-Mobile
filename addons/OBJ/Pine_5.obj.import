@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://cpwiufq2itove"
+path="res://.godot/imported/Pine_5.obj-b77ec343f94b313c9f3d5e0545e2f98c.mesh"
+
+[deps]
+
+files=["res://.godot/imported/Pine_5.obj-b77ec343f94b313c9f3d5e0545e2f98c.mesh"]
+
+source_file="res://addons/OBJ/Pine_5.obj"
+dest_files=["res://.godot/imported/Pine_5.obj-b77ec343f94b313c9f3d5e0545e2f98c.mesh", "res://.godot/imported/Pine_5.obj-b77ec343f94b313c9f3d5e0545e2f98c.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

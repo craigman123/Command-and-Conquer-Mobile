@@ -10,7 +10,7 @@ var nav_ready := false
 
 func _ready():
 	set_selected(false)
-	agent.path_height_offset = 0.5      # lines the path up with the tank's origin
+	agent.path_height_offset = 0.5   
 	agent.path_desired_distance = 1.0
 	agent.target_desired_distance = 1.0
 	await get_tree().physics_frame

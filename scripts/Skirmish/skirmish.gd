@@ -1,11 +1,8 @@
 extends Control
 
 const DATA_PATH := "res://data/skirmish.json"
-const FALLBACK_IMAGE := "res://assets/sprites/SkirmishChapterImages/FallbackImages/fallback.jpg"
-const MIN_LOADING_MS := 1500
 
 var loading_path := ""
-var load_start_ms := 0
 var chapters := []
 var selected_episode := {}
 
@@ -26,6 +23,14 @@ func _style_panels():
 	sb.set_content_margin_all(8)
 	for node in [$ChaptersContainer, $EpisodesController, $PanelContainer]:
 		node.add_theme_stylebox_override("panel", sb)
+		
+func _show_fallback():
+	loading_path = ""
+	$ColorRect2/LoadingVideo.stop()
+	$ColorRect2/LoadingVideo.hide()
+	$ColorRect2/ChapterImage.hide()
+	$ColorRect2/FallBackImage.show()
+	$ColorRect2/FallBackImage/Label.show()
 	
 func _make_button(text: String, group: ButtonGroup = null) -> Button:
 	var btn = Button.new()
@@ -73,10 +78,14 @@ func _build_chapter_buttons():
 func hide_all():
 	_clear($EpisodesController/Episodes)
 	selected_episode = {}
+	loading_path = ""
 	_update_play_button()
 	%SummaryText.text = ""
-	$ChapterImage.hide()
-	$ChapterImage/ColorRect.hide()
+	$ColorRect2/LoadingVideo.stop()
+	$ColorRect2/LoadingVideo.hide()
+	$ColorRect2/ChapterImage.hide()
+	$ColorRect2/FallBackImage.hide()
+	$ColorRect2/FallBackImage/Label.hide()
 
 func _update_play_button():
 	%PlayButton.show()
@@ -103,7 +112,6 @@ func _on_chapter_pressed(index: int):
 		btn.disabled = ep.get("locked", false)
 		btn.pressed.connect(_on_episode_pressed.bind(index, i))
 		$EpisodesController/Episodes.add_child(btn)
-	show_chapter_image(chapter.get("image", ""))
 
 
 func _on_episode_pressed(chapter_index: int, ep_index: int):
@@ -141,14 +149,19 @@ func _on_back_pressed():
 
 
 func show_chapter_image(path: String):
-	$ChapterImage.texture = null
-	$ChapterImage.show()
-	$ChapterImage/LoadingVideo.show()
-	$ChapterImage/LoadingVideo.play()
-	load_start_ms = Time.get_ticks_msec()
-
-	if not ResourceLoader.exists(path):
-		path = FALLBACK_IMAGE
+	$ColorRect2.show()
+	$ColorRect2/FallBackImage.hide()
+	$ColorRect2/FallBackImage/Label.hide()
+	$ColorRect2/ChapterImage.texture = null
+	if path == "" or not ResourceLoader.exists(path):
+		_show_fallback()
+		return
+	$ColorRect2/ChapterImage.show()
+	$ColorRect2/LoadingVideo.show()
+	$ColorRect2/LoadingVideo.play()
+	if ResourceLoader.has_cached(path):
+		_finish_loading(load(path))
+		return
 
 	loading_path = path
 	ResourceLoader.load_threaded_request(path)
@@ -159,20 +172,18 @@ func _process(_delta):
 		return
 
 	var status = ResourceLoader.load_threaded_get_status(loading_path)
-	var elapsed = Time.get_ticks_msec() - load_start_ms
 
-	if status == ResourceLoader.THREAD_LOAD_LOADED and elapsed >= MIN_LOADING_MS:
+	if status == ResourceLoader.THREAD_LOAD_LOADED:
 		_finish_loading(ResourceLoader.load_threaded_get(loading_path))
 	elif status == ResourceLoader.THREAD_LOAD_FAILED or status == ResourceLoader.THREAD_LOAD_INVALID_RESOURCE:
-		if loading_path != FALLBACK_IMAGE:
-			loading_path = FALLBACK_IMAGE
-			ResourceLoader.load_threaded_request(FALLBACK_IMAGE)
-		else:
-			_finish_loading(null)
+		_show_fallback()
 
 
 func _finish_loading(tex: Texture2D):
-	$ChapterImage.texture = tex
-	$ChapterImage/LoadingVideo.stop()
-	$ChapterImage/LoadingVideo.hide()
+	$ColorRect2/ChapterImage.texture = tex
+	$ColorRect2/ChapterImage.show()
+	$ColorRect2/LoadingVideo.stop()
+	$ColorRect2/LoadingVideo.hide()
+	$ColorRect2/FallBackImage.hide()
+	$ColorRect2/FallBackImage/Label.hide()
 	loading_path = ""

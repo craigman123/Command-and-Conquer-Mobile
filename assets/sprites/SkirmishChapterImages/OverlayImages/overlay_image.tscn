@@ -1,0 +1,16 @@
+[gd_scene format=3 uid="uid://drq348qignpas"]
+
+[ext_resource type="Texture2D" uid="uid://qxall4sdfjob" path="res://assets/sprites/SkirmishChapterImages/OverlayImages/Military_missile_carrier_truck_p…_2K_20261006200226.jpg" id="1_tx570"]
+
+[node name="OverlayImage" type="TextureRect" unique_id=9898962]
+anchors_preset = -1
+anchor_right = 0.44300002
+anchor_bottom = 0.5
+offset_left = 3.0
+offset_top = 3.0
+offset_right = -0.33602905
+offset_bottom = 4.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("1_tx570")
+expand_mode = 2
