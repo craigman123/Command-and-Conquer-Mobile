@@ -1,0 +1,5 @@
+[gd_scene format=3 uid="uid://b18uq5yt553jk"]
+
+[ext_resource type="PackedScene" uid="uid://cadvyv123gg24" path="res://assets/models/Environment/cliffs/desert_cliff1/desert_cliff_6.scn" id="1_fyx2m"]
+
+[node name="Sketchfab_Scene" unique_id=1108960570 instance=ExtResource("1_fyx2m")]
