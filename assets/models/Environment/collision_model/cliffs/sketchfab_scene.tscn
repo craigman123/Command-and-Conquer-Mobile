@@ -1,0 +1,8 @@
+[gd_scene format=3 uid="uid://delr1v04mcvls"]
+
+[ext_resource type="PackedScene" uid="uid://dgkf83uqhudev" path="res://assets/models/Environment/cliffs/dessert_cliff7/desert_western_ledge_rock_medium_05_ventdee_mid.glb" id="1_tnrp8"]
+
+[node name="Sketchfab_Scene" unique_id=727451764 instance=ExtResource("1_tnrp8")]
+
+[node name="StaticBody3D" parent="Sketchfab_model/Desert_Western_Ledge_Rock_Medium_05_ventdee_Mid_fbx/RootNode/ventdee_LOD0_TIER2_000/ventdee_LOD0_TIER2_000_MatID_1_0" parent_id_path=PackedInt32Array(2008490944) index="0" unique_id=1277601637]
+collision_layer = 128

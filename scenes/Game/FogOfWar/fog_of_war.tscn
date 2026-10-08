@@ -1,0 +1,16 @@
+[gd_scene format=3 uid="uid://be2muur6sx4ey"]
+
+[ext_resource type="Shader" uid="uid://dva01fc5pur8d" path="res://scenes/Game/Skirmish/Chapters/Chapter1/fog_of_war.gdshader" id="1_xrxha"]
+[ext_resource type="Script" uid="uid://bugygoqiantoo" path="res://scenes/Game/Skirmish/Chapters/Chapter1/fog_of_war.gd" id="2_5tpfo"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_mti6b"]
+render_priority = 0
+shader = ExtResource("1_xrxha")
+shader_parameter/explored_alpha = 0.55
+
+[sub_resource type="QuadMesh" id="QuadMesh_4kxuq"]
+
+[node name="FogOfWar" type="MeshInstance3D" unique_id=518366073]
+material_override = SubResource("ShaderMaterial_mti6b")
+mesh = SubResource("QuadMesh_4kxuq")
+script = ExtResource("2_5tpfo")

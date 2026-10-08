@@ -11,8 +11,10 @@ var nav_ready := false
 var path: PackedVector3Array = PackedVector3Array()
 var path_index := 0
 
+@export var vision_range := 30.0 
 
 func _ready():
+	add_to_group("player_units")
 	set_selected(false)
 	await get_tree().physics_frame
 	await get_tree().physics_frame

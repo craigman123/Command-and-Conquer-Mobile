@@ -42,7 +42,8 @@ materials/extract_path=""
 _subresources={
 "nodes": {
 "PATH:Sketchfab_model/Desert_Western_Cliff_Layered_Large_03_vbzmdd1ga_Mid_fbx/RootNode/vbzmdd1ga_LOD0_TIER2_000/vbzmdd1ga_LOD0_TIER2_000_MatID_1_0": {
-"generate/physics": true
+"generate/physics": true,
+"physics/layer": 128
 }
 }
 }

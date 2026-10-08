@@ -42,7 +42,8 @@ materials/extract_path=""
 _subresources={
 "nodes": {
 "PATH:Sketchfab_model/Desert_Western_Cliff_Layered_XL_01_veoneio_Mid_fbx/RootNode/veoneio_LOD0_TIER2_000/veoneio_LOD0_TIER2_000_MatID_1_0": {
-"generate/physics": true
+"generate/physics": true,
+"physics/layer": 128
 }
 }
 }

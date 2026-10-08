@@ -3,3 +3,6 @@
 [ext_resource type="PackedScene" uid="uid://cadvyv123gg24" path="res://assets/models/Environment/cliffs/desert_cliff1/desert_cliff_6.scn" id="1_fyx2m"]
 
 [node name="Sketchfab_Scene" unique_id=1108960570 instance=ExtResource("1_fyx2m")]
+
+[node name="P6DesertCliff-High_P6DesertCliffM_0" parent="Sketchfab_model/P6DesertCliff-High_fbx/RootNode/P6DesertCliff-High" parent_id_path=PackedInt32Array(690102317) index="0" unique_id=1888216931]
+layers = 128

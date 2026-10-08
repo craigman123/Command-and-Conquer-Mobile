@@ -18,7 +18,7 @@ extends Node3D
 @export var yaw_range := 45.0
 
 # The camera is never allowed to rise above this world height (Y).
-@export var max_camera_height := 80.0
+@export var max_camera_height := 90.0
 @export var debug_blocking := false
 
 # Drag a node here whose children are Marker3D points outlining the area

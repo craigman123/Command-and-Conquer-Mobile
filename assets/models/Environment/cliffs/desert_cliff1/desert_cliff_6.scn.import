@@ -4,12 +4,11 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://cadvyv123gg24"
-path="res://.godot/imported/desert_cliff_6.glb-af91b10fc10fccbbdadc2d5db532bd3d.scn"
+valid=false
 
 [deps]
 
-source_file="res://assets/models/Environment/cliffs/desert_cliff_6.glb"
-dest_files=["res://.godot/imported/desert_cliff_6.glb-af91b10fc10fccbbdadc2d5db532bd3d.scn"]
+source_file="res://assets/models/Environment/cliffs/desert_cliff1/desert_cliff_6.glb"
 
 [params]
 

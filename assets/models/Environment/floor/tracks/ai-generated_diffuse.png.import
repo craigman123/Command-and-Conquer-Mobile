@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://5jljwyyes7t0"
-path.s3tc="res://.godot/imported/T_xfhsfao_2K_B.png-e144aa5c5f254706853de6d63b3fb2c8.s3tc.ctex"
+uid="uid://vbhh0p7bwv6f"
+path.s3tc="res://.godot/imported/ai-generated_diffuse.png-70f9c1cfce502791f0a822071ee15408.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://assets/models/Environment/floor/T_xfhsfao_2K_B.png"
-dest_files=["res://.godot/imported/T_xfhsfao_2K_B.png-e144aa5c5f254706853de6d63b3fb2c8.s3tc.ctex"]
+source_file="res://assets/models/Environment/floor/tracks/ai-generated_diffuse.png"
+dest_files=["res://.godot/imported/ai-generated_diffuse.png-70f9c1cfce502791f0a822071ee15408.s3tc.ctex"]
 
 [params]
 

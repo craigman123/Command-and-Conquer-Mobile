@@ -8,13 +8,18 @@
 		  "name": "Prologue",
 		  "summary": "Protect 3 Convoys from terrorist and bandits, this convoy is carying radioative material called 'Technitium', if one convoy is destroyed it will kill any human being near it.",
 		  "image": "res://assets/images/Chapter1/episode1.jpg",
-		  "map": "res://scenes/Game/Skirmish/Chapters/Chapter1/map_prologue.scn"
+		  "map": "res://scenes/Game/Skirmish/Chapters/Chapter1/map_prologue.scn",
+		  "fog_min_size": [-300, -300],
+		  "fog_max_size": [300, 300],
+		  "locked": false
 		},
 		{
 		  "name": "Hold the Line",
 		  "summary": "Briefing text for chapter 1, episode 2.",
 		  "image": "",
 		  "map": "",
+		  "fog_min_size": [-100, -100],
+		  "fog_max_size": [100, 100],
 		  "locked": true
 		},
 		{
@@ -22,6 +27,8 @@
 		  "summary": "Briefing text for chapter 1, episode 3.",
 		  "image": "",
 		  "map": "",
+		  "fog_min_size": [-100, -100],
+		  "fog_max_size": [100, 100],
 		  "locked": true
 		},
 		{
@@ -29,6 +36,8 @@
 		  "summary": "Briefing text for chapter 1, episode 4.",
 		  "image": "",
 		  "map": "",
+		  "fog_min_size": [-100, -100],
+		  "fog_max_size": [100, 100],
 		  "locked": true
 		},
 		{
@@ -36,6 +45,8 @@
 		  "summary": "Briefing text for chapter 1, episode 5.",
 		  "image": "",
 		  "map": "",
+		  "fog_min_size": [-100, -100],
+		  "fog_max_size": [100, 100],
 		  "locked": true
 		},
 		{
@@ -43,6 +54,8 @@
 		  "summary": "Briefing text for chapter 1, episode 6.",
 		  "image": "",
 		  "map": "",
+		  "fog_min_size": [-100, -100],
+		  "fog_max_size": [100, 100],
 		  "locked": true
 		}
 	  ]
@@ -56,13 +69,17 @@
 		  "name": "Untitled",
 		  "summary": "Briefing text for chapter 2, episode 1.",
 		  "image": "",
-		  "map": ""
+		  "map": "",
+		  "fog_min_size": [-100, -100],
+		  "fog_max_size": [100, 100]
 		},
 		{
 		  "name": "Untitled",
 		  "summary": "Briefing text for chapter 2, episode 2.",
 		  "image": "",
 		  "map": "",
+		  "fog_min_size": [-100, -100],
+		  "fog_max_size": [100, 100],
 		  "locked": true
 		},
 		{
@@ -70,6 +87,8 @@
 		  "summary": "Briefing text for chapter 2, episode 3.",
 		  "image": "",
 		  "map": "",
+		  "fog_min_size": [-100, -100],
+		  "fog_max_size": [100, 100],
 		  "locked": true
 		},
 		{
@@ -77,6 +96,8 @@
 		  "summary": "Briefing text for chapter 2, episode 4.",
 		  "image": "",
 		  "map": "",
+		  "fog_min_size": [-100, -100],
+		  "fog_max_size": [100, 100],
 		  "locked": true
 		}
 	  ]
@@ -90,13 +111,17 @@
 		  "name": "Untitled",
 		  "summary": "Briefing text for chapter 3, episode 1.",
 		  "image": "",
-		  "map": ""
+		  "map": "",
+		  "fog_min_size": [-100, -100],
+		  "fog_max_size": [100, 100]
 		},
 		{
 		  "name": "Untitled",
 		  "summary": "Briefing text for chapter 3, episode 2.",
 		  "image": "",
 		  "map": "",
+		  "fog_min_size": [-100, -100],
+		  "fog_max_size": [100, 100],
 		  "locked": true
 		},
 		{
@@ -104,6 +129,8 @@
 		  "summary": "Briefing text for chapter 3, episode 3.",
 		  "image": "",
 		  "map": "",
+		  "fog_min_size": [-100, -100],
+		  "fog_max_size": [100, 100],
 		  "locked": true
 		},
 		{
@@ -111,6 +138,8 @@
 		  "summary": "Briefing text for chapter 3, episode 4.",
 		  "image": "",
 		  "map": "",
+		  "fog_min_size": [-100, -100],
+		  "fog_max_size": [100, 100],
 		  "locked": true
 		},
 		{
@@ -118,6 +147,8 @@
 		  "summary": "Briefing text for chapter 3, episode 5.",
 		  "image": "",
 		  "map": "",
+		  "fog_min_size": [-100, -100],
+		  "fog_max_size": [100, 100],
 		  "locked": true
 		},
 		{
@@ -125,6 +156,8 @@
 		  "summary": "Briefing text for chapter 3, episode 6.",
 		  "image": "",
 		  "map": "",
+		  "fog_min_size": [-100, -100],
+		  "fog_max_size": [100, 100],
 		  "locked": true
 		},
 		{
@@ -132,6 +165,8 @@
 		  "summary": "Briefing text for chapter 3, episode 7.",
 		  "image": "",
 		  "map": "",
+		  "fog_min_size": [-100, -100],
+		  "fog_max_size": [100, 100],
 		  "locked": true
 		}
 	  ]
@@ -145,13 +180,17 @@
 		  "name": "Untitled",
 		  "summary": "Briefing text for chapter 4, episode 1.",
 		  "image": "",
-		  "map": ""
+		  "map": "",
+		  "fog_min_size": [-100, -100],
+		  "fog_max_size": [100, 100]
 		},
 		{
 		  "name": "Untitled",
 		  "summary": "Briefing text for chapter 4, episode 2.",
 		  "image": "",
 		  "map": "",
+		  "fog_min_size": [-100, -100],
+		  "fog_max_size": [100, 100],
 		  "locked": true
 		}
 	  ]
@@ -165,13 +204,17 @@
 		  "name": "Untitled",
 		  "summary": "Briefing text for chapter 5, episode 1.",
 		  "image": "",
-		  "map": ""
+		  "map": "",
+		  "fog_min_size": [-100, -100],
+		  "fog_max_size": [100, 100]
 		},
 		{
 		  "name": "Untitled",
 		  "summary": "Briefing text for chapter 5, episode 2.",
 		  "image": "",
 		  "map": "",
+		  "fog_min_size": [-100, -100],
+		  "fog_max_size": [100, 100],
 		  "locked": true
 		},
 		{
@@ -179,6 +222,8 @@
 		  "summary": "Briefing text for chapter 5, episode 3.",
 		  "image": "",
 		  "map": "",
+		  "fog_min_size": [-100, -100],
+		  "fog_max_size": [100, 100],
 		  "locked": true
 		}
 	  ]
@@ -192,13 +237,17 @@
 		  "name": "Untitled",
 		  "summary": "Briefing text for chapter 6, episode 1.",
 		  "image": "",
-		  "map": ""
+		  "map": "",
+		  "fog_min_size": [-100, -100],
+		  "fog_max_size": [100, 100]
 		},
 		{
 		  "name": "Untitled",
 		  "summary": "Briefing text for chapter 6, episode 2.",
 		  "image": "",
 		  "map": "",
+		  "fog_min_size": [-100, -100],
+		  "fog_max_size": [100, 100],
 		  "locked": true
 		},
 		{
@@ -206,6 +255,8 @@
 		  "summary": "Briefing text for chapter 6, episode 3.",
 		  "image": "",
 		  "map": "",
+		  "fog_min_size": [-100, -100],
+		  "fog_max_size": [100, 100],
 		  "locked": true
 		},
 		{
@@ -213,6 +264,8 @@
 		  "summary": "Briefing text for chapter 6, episode 4.",
 		  "image": "",
 		  "map": "",
+		  "fog_min_size": [-100, -100],
+		  "fog_max_size": [100, 100],
 		  "locked": true
 		},
 		{
@@ -220,6 +273,8 @@
 		  "summary": "Briefing text for chapter 6, episode 5.",
 		  "image": "",
 		  "map": "",
+		  "fog_min_size": [-100, -100],
+		  "fog_max_size": [100, 100],
 		  "locked": true
 		},
 		{
@@ -227,6 +282,8 @@
 		  "summary": "Briefing text for chapter 6, episode 6.",
 		  "image": "",
 		  "map": "",
+		  "fog_min_size": [-100, -100],
+		  "fog_max_size": [100, 100],
 		  "locked": true
 		},
 		{
@@ -234,6 +291,8 @@
 		  "summary": "Briefing text for chapter 6, episode 7.",
 		  "image": "",
 		  "map": "",
+		  "fog_min_size": [-100, -100],
+		  "fog_max_size": [100, 100],
 		  "locked": true
 		},
 		{
@@ -241,6 +300,8 @@
 		  "summary": "Briefing text for chapter 6, episode 8.",
 		  "image": "",
 		  "map": "",
+		  "fog_min_size": [-100, -100],
+		  "fog_max_size": [100, 100],
 		  "locked": true
 		}
 	  ]
@@ -254,13 +315,17 @@
 		  "name": "Untitled",
 		  "summary": "Briefing text for chapter 7, episode 1.",
 		  "image": "",
-		  "map": ""
+		  "map": "",
+		  "fog_min_size": [-100, -100],
+		  "fog_max_size": [100, 100]
 		},
 		{
 		  "name": "Untitled",
 		  "summary": "Briefing text for chapter 7, episode 2.",
 		  "image": "",
 		  "map": "",
+		  "fog_min_size": [-100, -100],
+		  "fog_max_size": [100, 100],
 		  "locked": true
 		},
 		{
@@ -268,6 +333,8 @@
 		  "summary": "Briefing text for chapter 7, episode 3.",
 		  "image": "",
 		  "map": "",
+		  "fog_min_size": [-100, -100],
+		  "fog_max_size": [100, 100],
 		  "locked": true
 		},
 		{
@@ -275,6 +342,8 @@
 		  "summary": "Briefing text for chapter 7, episode 4.",
 		  "image": "",
 		  "map": "",
+		  "fog_min_size": [-100, -100],
+		  "fog_max_size": [100, 100],
 		  "locked": true
 		}
 	  ]
@@ -288,13 +357,17 @@
 		  "name": "Untitled",
 		  "summary": "Briefing text for chapter 8, episode 1.",
 		  "image": "",
-		  "map": ""
+		  "map": "",
+		  "fog_min_size": [-100, -100],
+		  "fog_max_size": [100, 100]
 		},
 		{
 		  "name": "Untitled",
 		  "summary": "Briefing text for chapter 8, episode 2.",
 		  "image": "",
 		  "map": "",
+		  "fog_min_size": [-100, -100],
+		  "fog_max_size": [100, 100],
 		  "locked": true
 		},
 		{
@@ -302,6 +375,8 @@
 		  "summary": "Briefing text for chapter 8, episode 3.",
 		  "image": "",
 		  "map": "",
+		  "fog_min_size": [-100, -100],
+		  "fog_max_size": [100, 100],
 		  "locked": true
 		},
 		{
@@ -309,6 +384,8 @@
 		  "summary": "Briefing text for chapter 8, episode 4.",
 		  "image": "",
 		  "map": "",
+		  "fog_min_size": [-100, -100],
+		  "fog_max_size": [100, 100],
 		  "locked": true
 		}
 	  ]
@@ -322,13 +399,17 @@
 		  "name": "Untitled",
 		  "summary": "Briefing text for chapter 9, episode 1.",
 		  "image": "",
-		  "map": ""
+		  "map": "",
+		  "fog_min_size": [-100, -100],
+		  "fog_max_size": [100, 100]
 		},
 		{
 		  "name": "Untitled",
 		  "summary": "Briefing text for chapter 9, episode 2.",
 		  "image": "",
 		  "map": "",
+		  "fog_min_size": [-100, -100],
+		  "fog_max_size": [100, 100],
 		  "locked": true
 		},
 		{
@@ -336,6 +417,8 @@
 		  "summary": "Briefing text for chapter 9, episode 3.",
 		  "image": "",
 		  "map": "",
+		  "fog_min_size": [-100, -100],
+		  "fog_max_size": [100, 100],
 		  "locked": true
 		},
 		{
@@ -343,6 +426,8 @@
 		  "summary": "Briefing text for chapter 9, episode 4.",
 		  "image": "",
 		  "map": "",
+		  "fog_min_size": [-100, -100],
+		  "fog_max_size": [100, 100],
 		  "locked": true
 		},
 		{
@@ -350,6 +435,8 @@
 		  "summary": "Briefing text for chapter 9, episode 5.",
 		  "image": "",
 		  "map": "",
+		  "fog_min_size": [-100, -100],
+		  "fog_max_size": [100, 100],
 		  "locked": true
 		},
 		{
@@ -357,6 +444,8 @@
 		  "summary": "Briefing text for chapter 9, episode 6.",
 		  "image": "",
 		  "map": "",
+		  "fog_min_size": [-100, -100],
+		  "fog_max_size": [100, 100],
 		  "locked": true
 		},
 		{
@@ -364,6 +453,8 @@
 		  "summary": "Briefing text for chapter 9, episode 7.",
 		  "image": "",
 		  "map": "",
+		  "fog_min_size": [-100, -100],
+		  "fog_max_size": [100, 100],
 		  "locked": true
 		}
 	  ]
@@ -377,13 +468,17 @@
 		  "name": "Untitled",
 		  "summary": "Briefing text for chapter 10, episode 1.",
 		  "image": "",
-		  "map": ""
+		  "map": "",
+		  "fog_min_size": [-100, -100],
+		  "fog_max_size": [100, 100]
 		},
 		{
 		  "name": "Untitled",
 		  "summary": "Briefing text for chapter 10, episode 2.",
 		  "image": "",
 		  "map": "",
+		  "fog_min_size": [-100, -100],
+		  "fog_max_size": [100, 100],
 		  "locked": true
 		},
 		{
@@ -391,6 +486,8 @@
 		  "summary": "Briefing text for chapter 10, episode 3.",
 		  "image": "",
 		  "map": "",
+		  "fog_min_size": [-100, -100],
+		  "fog_max_size": [100, 100],
 		  "locked": true
 		},
 		{
@@ -398,6 +495,8 @@
 		  "summary": "Briefing text for chapter 10, episode 4.",
 		  "image": "",
 		  "map": "",
+		  "fog_min_size": [-100, -100],
+		  "fog_max_size": [100, 100],
 		  "locked": true
 		},
 		{
@@ -405,6 +504,8 @@
 		  "summary": "Briefing text for chapter 10, episode 5.",
 		  "image": "",
 		  "map": "",
+		  "fog_min_size": [-100, -100],
+		  "fog_max_size": [100, 100],
 		  "locked": true
 		}
 	  ]

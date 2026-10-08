@@ -1,0 +1,5 @@
+[gd_scene format=3 uid="uid://di8q7u3r5lf41"]
+
+[ext_resource type="PackedScene" uid="uid://dabcfnoibo4ph" path="res://assets/models/Environment/cliffs/quarry_cliff/quarry_cliff_ubjuddqda_mid.glb" id="1_kjvdq"]
+
+[node name="Sketchfab_Scene" unique_id=2014739276 instance=ExtResource("1_kjvdq")]
