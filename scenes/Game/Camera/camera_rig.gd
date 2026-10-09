@@ -17,6 +17,12 @@ extends Node3D
 @export var limit_yaw := true
 @export var yaw_range := 45.0
 
+# Fade-in when the mission starts
+@export var fade_in_enabled := true
+@export var fade_in_time := 1.5
+@export var fade_hold := 0.3  # seconds of full black before fading starts
+@export var fade_color := Color.BLACK
+
 # The camera is never allowed to rise above this world height (Y).
 @export var max_camera_height := 90.0
 @export var debug_blocking := false
@@ -40,6 +46,27 @@ func _ready():
 	pitch = clamp(pitch, deg_to_rad(min_pitch), deg_to_rad(max_pitch))
 	_update_camera()
 	_build_bounds()
+	if fade_in_enabled:
+		_fade_in()
+		
+func _fade_in() -> void:
+	var layer := CanvasLayer.new()
+	layer.layer = 100  # draws above all UI
+	add_child(layer)
+
+	var rect := ColorRect.new()
+	rect.color = fade_color
+	rect.set_anchors_preset(Control.PRESET_FULL_RECT)
+	rect.mouse_filter = Control.MOUSE_FILTER_IGNORE  # don't block clicks
+	layer.add_child(rect)
+
+	if fade_hold > 0.0:
+		await get_tree().create_timer(fade_hold).timeout
+
+	var tween := create_tween()
+	tween.tween_property(rect, "color:a", 0.0, fade_in_time)
+	await tween.finished
+	layer.queue_free()
 
 
 # Reads the Marker3D children and keeps only their X and Z (the top-down view).

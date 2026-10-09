@@ -1,0 +1,7 @@
+[gd_resource type="StandardMaterial3D" format=3 uid="uid://lwg1kft1nnus"]
+
+[resource]
+resource_name = "hmmwv_body_ukr"
+cull_mode = 2
+albedo_color = Color(0, 0.6313726, 0.52156866, 1)
+metadata/_gltf_primary_texture_coord = 0

@@ -1,0 +1,16 @@
+[gd_resource type="StandardMaterial3D" format=3 uid="uid://dedppq2sdos45"]
+
+[ext_resource type="Texture2D" uid="uid://djoaxg72x7t0e" path="res://assets/models/Units/Vehicles/Humvee/humvee_brdm2_01_co_baseColor.png" id="1_such5"]
+[ext_resource type="Texture2D" uid="uid://rg170uu7vd4j" path="res://assets/models/Units/Vehicles/Humvee/humvee_brdm2_01_co_metallicRoughness.png" id="2_5c81t"]
+
+[resource]
+resource_name = "brdm2_01_co"
+cull_mode = 2
+albedo_texture = ExtResource("1_such5")
+metallic_texture = ExtResource("2_5c81t")
+metallic_texture_channel = 2
+roughness_texture = ExtResource("2_5c81t")
+roughness_texture_channel = 1
+ao_enabled = true
+ao_texture = ExtResource("2_5c81t")
+metadata/_gltf_primary_texture_coord = 0

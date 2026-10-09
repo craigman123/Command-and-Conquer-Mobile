@@ -1,0 +1,432 @@
+{
+  "accessors": [
+    {
+      "bufferView": 2,
+      "componentType": 5126,
+      "count": 2070,
+      "max": [
+        0.8617821931838989,
+        1.0925990343093872,
+        1.977828860282898
+      ],
+      "min": [
+        -1.2647677659988403,
+        -1.0037368535995483,
+        0.19224463403224945
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 2,
+      "byteOffset": 24840,
+      "componentType": 5126,
+      "count": 2070,
+      "max": [
+        0.9977099895477295,
+        0.998999297618866,
+        0.99996417760849
+      ],
+      "min": [
+        -0.9995992183685303,
+        -0.9997968077659607,
+        -0.7461425065994263
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 3,
+      "componentType": 5126,
+      "count": 2070,
+      "max": [
+        0.997523307800293,
+        0.9996705651283264,
+        0.9959079027175903,
+        1.0
+      ],
+      "min": [
+        -0.9978702664375305,
+        -0.9999769926071167,
+        -0.9995850920677185,
+        -1.0
+      ],
+      "type": "VEC4"
+    },
+    {
+      "bufferView": 1,
+      "componentType": 5126,
+      "count": 2070,
+      "max": [
+        1.0,
+        0.9832406640052795
+      ],
+      "min": [
+        0.010087463073432446,
+        0.0017475578933954239
+      ],
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 1,
+      "byteOffset": 16560,
+      "componentType": 5126,
+      "count": 2070,
+      "max": [
+        1.0,
+        0.9832406640052795
+      ],
+      "min": [
+        0.010087463073432446,
+        0.0017475578933954239
+      ],
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 0,
+      "componentType": 5125,
+      "count": 7875,
+      "type": "SCALAR"
+    },
+    {
+      "bufferView": 2,
+      "byteOffset": 49680,
+      "componentType": 5126,
+      "count": 27375,
+      "max": [
+        0.8617821931838989,
+        1.0925990343093872,
+        1.977828860282898
+      ],
+      "min": [
+        -1.2647677659988403,
+        -1.0037368535995483,
+        -0.11794247478246689
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 2,
+      "byteOffset": 378180,
+      "componentType": 5126,
+      "count": 27375,
+      "max": [
+        0.999977707862854,
+        0.9999643564224243,
+        0.9997775554656982
+      ],
+      "min": [
+        -0.9999644756317139,
+        -0.9999862909317017,
+        -1.0
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 3,
+      "byteOffset": 33120,
+      "componentType": 5126,
+      "count": 27375,
+      "max": [
+        0.999945342540741,
+        1.0,
+        0.9998301267623901,
+        1.0
+      ],
+      "min": [
+        -0.9999688267707825,
+        -0.9999988675117493,
+        -0.9999321699142456,
+        -1.0
+      ],
+      "type": "VEC4"
+    },
+    {
+      "bufferView": 1,
+      "byteOffset": 33120,
+      "componentType": 5126,
+      "count": 27375,
+      "max": [
+        1.456053376197815,
+        4.123363018035889
+      ],
+      "min": [
+        -3.8142166137695313,
+        -0.47885066270828247
+      ],
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 1,
+      "byteOffset": 252120,
+      "componentType": 5126,
+      "count": 27375,
+      "max": [
+        1.456053376197815,
+        4.123363018035889
+      ],
+      "min": [
+        -3.8142166137695313,
+        -0.47885066270828247
+      ],
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 0,
+      "byteOffset": 31500,
+      "componentType": 5125,
+      "count": 110691,
+      "type": "SCALAR"
+    }
+  ],
+  "asset": {
+    "extras": {
+      "author": "PlantCatalog (https://sketchfab.com/PlantCatalog)",
+      "license": "CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)",
+      "source": "https://sketchfab.com/3d-models/realistic-hd-rosemary-willow-9799-83dc6c88f9184ac08d294e9751d8029c",
+      "title": "Realistic HD Rosemary willow (97/99)"
+    },
+    "generator": "Sketchfab-16.14.0",
+    "version": "2.0"
+  },
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteLength": 474264,
+      "name": "floatBufferViews",
+      "target": 34963
+    },
+    {
+      "buffer": 0,
+      "byteLength": 471120,
+      "byteOffset": 474264,
+      "byteStride": 8,
+      "name": "floatBufferViews",
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 706680,
+      "byteOffset": 945384,
+      "byteStride": 12,
+      "name": "floatBufferViews",
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 471120,
+      "byteOffset": 1652064,
+      "byteStride": 16,
+      "name": "floatBufferViews",
+      "target": 34962
+    }
+  ],
+  "buffers": [
+    {
+      "byteLength": 2123184,
+      "uri": "scene.bin"
+    }
+  ],
+  "images": [
+    {
+      "uri": "textures/Salix__elaeag_br_cut_2_baseColor.png"
+    },
+    {
+      "uri": "textures/Salix__elaeag_br_cut_2_normal.png"
+    },
+    {
+      "uri": "textures/Salix__elaeag_dead_wood_baseColor.png"
+    },
+    {
+      "uri": "textures/Salix__elaeag_dead_wood_normal.png"
+    }
+  ],
+  "materials": [
+    {
+      "doubleSided": true,
+      "name": "Salix__elaeag_br_cut_2",
+      "normalTexture": {
+        "index": 1
+      },
+      "pbrMetallicRoughness": {
+        "baseColorTexture": {
+          "index": 0
+        },
+        "metallicFactor": 0.0,
+        "roughnessFactor": 0.9032823694489568
+      }
+    },
+    {
+      "doubleSided": true,
+      "name": "Salix__elaeag_dead_wood",
+      "normalTexture": {
+        "index": 3
+      },
+      "pbrMetallicRoughness": {
+        "baseColorTexture": {
+          "index": 2
+        },
+        "metallicFactor": 0.0,
+        "roughnessFactor": 0.9032823694489568
+      }
+    }
+  ],
+  "meshes": [
+    {
+      "name": "Salix_elaeagnos_HD_Salix  elaeag br cut 2_0",
+      "primitives": [
+        {
+          "attributes": {
+            "NORMAL": 1,
+            "POSITION": 0,
+            "TANGENT": 2,
+            "TEXCOORD_0": 3,
+            "TEXCOORD_1": 4
+          },
+          "indices": 5,
+          "material": 0,
+          "mode": 4
+        }
+      ]
+    },
+    {
+      "name": "Salix_elaeagnos_HD_Salix  elaeag dead wood_0",
+      "primitives": [
+        {
+          "attributes": {
+            "NORMAL": 7,
+            "POSITION": 6,
+            "TANGENT": 8,
+            "TEXCOORD_0": 9,
+            "TEXCOORD_1": 10
+          },
+          "indices": 11,
+          "material": 1,
+          "mode": 4
+        }
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "children": [
+        1
+      ],
+      "matrix": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        2.220446049250313e-16,
+        -1.0,
+        0.0,
+        0.0,
+        1.0,
+        2.220446049250313e-16,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "name": "Sketchfab_model"
+    },
+    {
+      "children": [
+        2
+      ],
+      "matrix": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        -1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "name": "Salix elaeagnos HD_Dead mat 100_LOD0.fbx"
+    },
+    {
+      "children": [
+        3
+      ],
+      "name": "RootNode"
+    },
+    {
+      "children": [
+        4,
+        5
+      ],
+      "matrix": [
+        0.9999999403953552,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        2.220445916901415e-16,
+        -0.9999999403953552,
+        0.0,
+        0.0,
+        1.0000001192092896,
+        2.220446313948109e-16,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "name": "Salix_elaeagnos_HD"
+    },
+    {
+      "mesh": 0,
+      "name": "Salix_elaeagnos_HD_Salix  elaeag br cut 2_0"
+    },
+    {
+      "mesh": 1,
+      "name": "Salix_elaeagnos_HD_Salix  elaeag dead wood_0"
+    }
+  ],
+  "samplers": [
+    {
+      "magFilter": 9729,
+      "minFilter": 9987,
+      "wrapS": 10497,
+      "wrapT": 10497
+    }
+  ],
+  "scene": 0,
+  "scenes": [
+    {
+      "name": "Sketchfab_Scene",
+      "nodes": [
+        0
+      ]
+    }
+  ],
+  "textures": [
+    {
+      "sampler": 0,
+      "source": 0
+    },
+    {
+      "sampler": 0,
+      "source": 1
+    },
+    {
+      "sampler": 0,
+      "source": 2
+    },
+    {
+      "sampler": 0,
+      "source": 3
+    }
+  ]
+}

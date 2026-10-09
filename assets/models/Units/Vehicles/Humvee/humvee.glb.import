@@ -1,0 +1,93 @@
+[remap]
+
+importer="scene"
+importer_version=1
+type="PackedScene"
+uid="uid://nf6j8o8gd5a"
+path="res://.godot/imported/humvee.glb-e19d9ece0fb0225b93c02dd38d6157ed.scn"
+
+[deps]
+
+source_file="res://assets/models/Units/Vehicles/Humvee/humvee.glb"
+dest_files=["res://.godot/imported/humvee.glb-e19d9ece0fb0225b93c02dd38d6157ed.scn"]
+
+[params]
+
+nodes/root_type=""
+nodes/root_name=""
+nodes/root_script=null
+mesh_library/use_node_names_as_mesh_names=false
+array_mesh/deduplicate_surfaces=true
+nodes/apply_root_scale=true
+nodes/root_scale=0.9
+nodes/import_as_skeleton_bones=false
+nodes/use_name_suffixes=true
+nodes/use_node_type_suffixes=true
+meshes/ensure_tangents=true
+meshes/generate_lods=true
+meshes/create_shadow_meshes=true
+meshes/light_baking=1
+meshes/lightmap_texel_size=0.2
+meshes/force_disable_compression=false
+skins/use_named_skins=true
+animation/import=true
+animation/fps=30
+animation/trimming=false
+animation/remove_immutable_tracks=true
+animation/import_rest_as_RESET=false
+import_script/path=""
+materials/extract=0
+materials/extract_format=0
+materials/extract_path=""
+_subresources={
+"materials": {
+"1mmwv_regular_1_co": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://assets/models/Units/Vehicles/Humvee/materials/1mmwv_regular_1_co.tres",
+"use_external/path": "uid://dt6g0288us8pr"
+},
+"1mmwv_regular_2_co": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://assets/models/Units/Vehicles/Humvee/materials/1mmwv_regular_2_co.tres",
+"use_external/path": "uid://fmkakmwbn1tj"
+},
+"brdm2_01_co": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://assets/models/Units/Vehicles/Humvee/materials/brdm2_01_co.tres",
+"use_external/path": "uid://dedppq2sdos45"
+},
+"hmmwv_body_ukr": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://assets/models/Units/Vehicles/Humvee/materials/hmmwv_body_ukr.tres",
+"use_external/path": "uid://lwg1kft1nnus"
+},
+"hmmwv_hood_ukr": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://assets/models/Units/Vehicles/Humvee/materials/hmmwv_hood_ukr.tres",
+"use_external/path": "uid://bljo3h70cp63h"
+},
+"hua_2_co_ua": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://assets/models/Units/Vehicles/Humvee/materials/hua_2_co_ua.tres",
+"use_external/path": "uid://q8kvb8wr5vo4"
+},
+"kord": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://assets/models/Units/Vehicles/Humvee/materials/kord.tres",
+"use_external/path": "uid://d16cspshftchs"
+},
+"material": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://assets/models/Units/Vehicles/Humvee/materials/material.tres",
+"use_external/path": "uid://1mtq7j01tnae"
+},
+"us_hmmwv_detail": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://assets/models/Units/Vehicles/Humvee/materials/us_hmmwv_detail.tres",
+"use_external/path": "uid://xwyprqhpnqkf"
+}
+}
+}
+gltf/naming_version=2
+gltf/embedded_image_handling=1
+gltf/texture_map_mode=1

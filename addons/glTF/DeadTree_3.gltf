@@ -21,7 +21,7 @@
 	"materials":[
 		{
 			"doubleSided":true,
-			"name":"Bark_DeadTree",
+			"name":"NormalTree_Bark",
 			"normalTexture":{
 				"index":0
 			},
@@ -29,22 +29,22 @@
 				"baseColorTexture":{
 					"index":1
 				},
-				"metallicFactor":0
+				"metallicFactor":0,
+				"roughnessFactor":0.5
 			}
 		}
 	],
 	"meshes":[
 		{
-			"name":"tree.019",
+			"name":"Cylinder.009",
 			"primitives":[
 				{
 					"attributes":{
-						"COLOR_0":0,
-						"POSITION":1,
-						"NORMAL":2,
-						"TEXCOORD_0":3
+						"POSITION":0,
+						"NORMAL":1,
+						"TEXCOORD_0":2
 					},
-					"indices":4,
+					"indices":3,
 					"material":0
 				}
 			]
@@ -63,86 +63,74 @@
 	"images":[
 		{
 			"mimeType":"image/png",
-			"name":"Bark_DeadTree_Normal",
-			"uri":"Bark_DeadTree_Normal.png"
+			"name":"NormalTree_Bark_Normal",
+			"uri":"NormalTree_Bark_Normal.png"
 		},
 		{
-			"mimeType":"image/png",
-			"name":"Bark_DeadTree",
-			"uri":"Bark_DeadTree.png"
+			"mimeType":"image/jpeg",
+			"name":"NormalTree_Bark",
+			"uri":"NormalTree_Bark.jpg"
 		}
 	],
 	"accessors":[
 		{
 			"bufferView":0,
 			"componentType":5126,
-			"count":7936,
-			"type":"VEC4"
+			"count":2986,
+			"max":[
+				2.8662118911743164,
+				4.9478936195373535,
+				0.7827639579772949
+			],
+			"min":[
+				-1.3526040315628052,
+				-0.010010122321546078,
+				-0.918813169002533
+			],
+			"type":"VEC3"
 		},
 		{
 			"bufferView":1,
 			"componentType":5126,
-			"count":7936,
-			"max":[
-				2.540004014968872,
-				12.944830894470215,
-				3.043358564376831
-			],
-			"min":[
-				-3.847569704055786,
-				-0.3355545997619629,
-				-3.3867006301879883
-			],
+			"count":2986,
 			"type":"VEC3"
 		},
 		{
 			"bufferView":2,
 			"componentType":5126,
-			"count":7936,
-			"type":"VEC3"
-		},
-		{
-			"bufferView":3,
-			"componentType":5126,
-			"count":7936,
+			"count":2986,
 			"type":"VEC2"
 		},
 		{
-			"bufferView":4,
+			"bufferView":3,
 			"componentType":5123,
-			"count":17406,
+			"count":14784,
 			"type":"SCALAR"
 		}
 	],
 	"bufferViews":[
 		{
 			"buffer":0,
-			"byteLength":126976,
+			"byteLength":35832,
 			"byteOffset":0,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":95232,
-			"byteOffset":126976,
+			"byteLength":35832,
+			"byteOffset":35832,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":95232,
-			"byteOffset":222208,
+			"byteLength":23888,
+			"byteOffset":71664,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":63488,
-			"byteOffset":317440,
-			"target":34962
-		},
-		{
-			"buffer":0,
-			"byteLength":34812,
-			"byteOffset":380928,
+			"byteLength":29568,
+			"byteOffset":95552,
 			"target":34963
 		}
 	],
@@ -154,7 +142,7 @@
 	],
 	"buffers":[
 		{
-			"byteLength":415740,
+			"byteLength":125120,
 			"uri":"DeadTree_3.bin"
 		}
 	]

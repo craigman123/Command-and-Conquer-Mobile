@@ -1,7 +1,7 @@
 [gd_resource type="Terrain3DAssets" format=3 uid="uid://cwbetbhi4qpyx"]
 
-[ext_resource type="Texture2D" uid="uid://5jljwyyes7t0" path="res://assets/models/Environment/floor/T_xfhsfao_2K_B.png" id="1_x51v6"]
-[ext_resource type="Texture2D" uid="uid://bnxrqhgmn8qgd" path="res://assets/models/Environment/floor/T_xfhsfao_2K_N.png" id="2_iaete"]
+[ext_resource type="Texture2D" uid="uid://bxri7hpi2ivju" path="res://assets/models/Environment/floor/Ground080_2K-JPG_Color.jpg" id="1_x51v6"]
+[ext_resource type="Texture2D" uid="uid://byw2okvxjprao" path="res://assets/models/Environment/floor/Ground080_2K-JPG_NormalGL.jpg" id="2_iaete"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_sg8eg"]
 transparency = 4
@@ -21,12 +21,11 @@ last_lod = 0
 last_shadow_lod = 0
 lod0_range = 128.0
 
-[sub_resource type="Terrain3DTextureAsset" id="Terrain3DTextureAsset_x51v6"]
-name = "T_xfhsfao_2K_B"
+[sub_resource type="Terrain3DTextureAsset" id="Terrain3DTextureAsset_map76"]
+name = "Ground080_2K-JPG_Color"
 albedo_texture = ExtResource("1_x51v6")
 normal_texture = ExtResource("2_iaete")
-normal_depth = 0.642
 
 [resource]
 mesh_list = Array[Terrain3DMeshAsset]([SubResource("Terrain3DMeshAsset_sm4l8")])
-texture_list = Array[Terrain3DTextureAsset]([SubResource("Terrain3DTextureAsset_x51v6")])
+texture_list = Array[Terrain3DTextureAsset]([SubResource("Terrain3DTextureAsset_map76")])

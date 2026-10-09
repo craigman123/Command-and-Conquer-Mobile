@@ -1,0 +1,34 @@
+[gd_scene format=3 uid="uid://cy17rrwhjy33j"]
+
+[ext_resource type="Script" uid="uid://dhpfa0wvoyl0o" path="res://assets/models/Units/Vehicles/Humvee/humvee.gd" id="1_xpkh7"]
+[ext_resource type="PackedScene" uid="uid://nf6j8o8gd5a" path="res://assets/models/Units/Vehicles/Humvee/humvee.glb" id="2_y83df"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_n864j"]
+size = Vector3(2, 1, 3)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_8tbwg"]
+shading_mode = 0
+albedo_color = Color(0.24313726, 1, 1, 1)
+
+[sub_resource type="TorusMesh" id="TorusMesh_y83df"]
+material = SubResource("StandardMaterial3D_8tbwg")
+inner_radius = 2.05
+outer_radius = 2.0
+ring_segments = 12
+
+[node name="Humvee" type="CharacterBody3D" unique_id=1880719621 groups=["units"]]
+script = ExtResource("1_xpkh7")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1955055856]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+shape = SubResource("BoxShape3D_n864j")
+
+[node name="NavigationAgent3D" type="NavigationAgent3D" parent="." unique_id=1734141519]
+
+[node name="SelectionRing" type="MeshInstance3D" parent="." unique_id=753145138]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 0)
+cast_shadow = 0
+mesh = SubResource("TorusMesh_y83df")
+
+[node name="humvee" parent="." unique_id=1795825859 instance=ExtResource("2_y83df")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.01, 0)
