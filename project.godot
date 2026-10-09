@@ -22,6 +22,7 @@ VideoBackground="*uid://biex5u1pwfv2q"
 TextScrambler="*uid://buc1hsyqblo37"
 UISound="*uid://ncouxosjwly0"
 GameSession="*uid://bh4rht4mmm5f7"
+LoadStatus="*uid://21qusc2e41kf"
 
 [display]
 

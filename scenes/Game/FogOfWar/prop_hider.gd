@@ -45,6 +45,7 @@ func _ready() -> void:
 	_state.fill(0)
 	_timer = check_interval
 	print("prop_hider: managing ", _meshes.size(), " meshes")
+	LoadStatus.report("Optimizing the map: %d meshes managed" % _meshes.size())
 
 
 func _process(delta: float) -> void:

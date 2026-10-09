@@ -1,68 +1,50 @@
-extends CharacterBody3D
+extends VehicleBase
 
-@export var speed := 5.0
-@export var turn_speed := 6.0
-@export var reach_distance := 1.0  # how close (flat, ignoring height) counts as "arrived"
+# Shared stuff (selection ring, whiskers, stuck check, make-way, tilt, smoke)
+# lives in VehicleBase. This file only holds how a tank drives.
 
-@onready var agent: NavigationAgent3D = $NavigationAgent3D
-@onready var ring: Node3D = $SelectionRing
-
-var nav_ready := false
-var path: PackedVector3Array = PackedVector3Array()
-var path_index := 0
-
-@export var vision_range := 30.0 
-
-func _ready():
-	add_to_group("player_units")
-	set_selected(false)
-	await get_tree().physics_frame
-	await get_tree().physics_frame
-	nav_ready = true
+@export_group("Tank Driving")
+@export var turn_rate_degrees := 120.0   # tracks can pivot in place
+@export var pivot_angle_degrees := 45.0  # target more off-axis than this -> stop and turn first
 
 
-func set_selected(value: bool):
-	ring.visible = value
+func _init():
+	forward_is_plus_z = false                  # the tank model faces -Z
+	speed = 5.0
+	smoke_offset = Vector3(0.0, 0.7, 2.3)      # exhaust at the rear (+Z for this model)
 
 
-func move_to(pos: Vector3):
-	if not nav_ready:
-		return
-	var map = agent.get_navigation_map()
-	var closest = NavigationServer3D.map_get_closest_point(map, pos)
-	path = NavigationServer3D.map_get_path(map, global_position, closest, true)
-	path_index = 0
-	print("path size: ", path.size())
+func _drive(delta: float):
+	var target_speed := 0.0
+	var steer_angle := 0.0
 
+	if has_target:
+		reversing = false
+		var angle := _forward().signed_angle_to(target_dir, Vector3.UP)  # + = target is to the left
+		steer_angle = angle
+		target_speed = speed
+		if absf(angle) > deg_to_rad(pivot_angle_degrees):
+			target_speed = 0.0                 # turn on the spot first
 
-func _physics_process(delta):
-	# gravity
-	if is_on_floor():
-		velocity.y = 0.0
+		# brake near the end of the path
+		if is_last_waypoint and target_dist < slow_down_distance:
+			target_speed *= clampf(target_dist / slow_down_distance, 0.25, 1.0)
+
+		# whiskers -> [extra_steer, speed_multiplier, path_weight]
+		var avoid := _avoid_obstacles()
+		steer_angle = clampf(steer_angle * (1.0 - avoid[2]) + avoid[0], -PI, PI)
+		target_speed *= avoid[1]
 	else:
-		velocity.y -= 20.0 * delta
+		reversing = false
 
-	# follow the path using only X and Z, so a navmesh that sits
-	# higher or lower than the ground can't freeze the tank
-	var moving := false
-	while path_index < path.size():
-		var target = path[path_index]
-		var dir = target - global_position
-		dir.y = 0.0
+	# stuck detection: back up for a moment
+	if _update_stuck(delta, target_speed):
+		reversing = true
+		target_speed = -speed * 0.6
+		steer_angle = -steer_angle
 
-		if dir.length() < reach_distance:
-			path_index += 1  # reached this point, go to the next one
-			continue
+	_accelerate(target_speed, delta)
 
-		dir = dir.normalized()
-		velocity.x = dir.x * speed
-		velocity.z = dir.z * speed
-		rotation.y = lerp_angle(rotation.y, atan2(-dir.x, -dir.z), turn_speed * delta)
-		moving = true
-		break
-
-	if not moving:
-		velocity.x = 0.0
-		velocity.z = 0.0
-
-	move_and_slide()
+	# tracks turn independently of speed
+	var max_step := deg_to_rad(turn_rate_degrees) * delta
+	rotation.y += clampf(steer_angle, -max_step, max_step)

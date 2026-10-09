@@ -22,6 +22,8 @@ func _ready() -> void:
 			skipped += 1
 	if debug_print:
 		print("bendables: set up ", n, " bushes, skipped ", skipped)
+		var no_bush: int = n + skipped
+		LoadStatus.report("Planting %d of %d bushes..." % [n, no_bush])
 
 
 func _make_bendable(bush: Node3D) -> bool:

@@ -1,35 +1,63 @@
 [gd_scene format=3 uid="uid://org1g44dt6fy"]
 
 [ext_resource type="VideoStream" uid="uid://cpjyb0gpfjgv" path="res://assets/sprites/SkirmishChapterImages/LoadingScreen/loading_screen.ogv" id="1_w4mdj"]
+[ext_resource type="FontFile" uid="uid://di65ifyqi7a60" path="res://assets/fonts/Orbitron-Black.ttf" id="2_w5d26"]
 
 [sub_resource type="GDScript" id="GDScript_w4mdj"]
 script/source = "extends Control
 
 const MIN_SHOW_SEC := 3.0
+const MSG_SEC := 0.4        # how long each message stays on screen
+const SETTLE_SEC := 1.0     # quiet time with no new messages before closing
+const MAX_INIT_SEC := 10.0  # safety timeout
 
 @onready var video: VideoStreamPlayer = $VideoStreamPlayer
 @onready var bar: ProgressBar = $ProgressBar
+@onready var status_label: Label = $StatusLabel
 
 var target := \"\"
 var shown := 0.0
 var elapsed := 0.0
 var done := false
+var map_name := \"\"
+
+# map initialization phase
+var initializing := false
+var init_time := 0.0
+var idle_time := 0.0
+var msg_timer := 0.0
+var queue: Array[String] = []
+var layer: CanvasLayer
+
 
 func _ready():
 	bar.min_value = 0
 	bar.max_value = 100
 	bar.value = 0
+	status_label.text = \"Preparing...\"
 	video.finished.connect(video.play)
 	video.play()
+	LoadStatus.message.connect(_on_message)
 
 	target = SceneLoader.next_scene
 	if target == \"\":
 		push_warning(\"No scene to load\")
 		get_tree().change_scene_to_file(\"res://scenes/StartingMenu/selection_menu.tscn\")
 		return
+
+	map_name = target.get_file().get_basename().capitalize()
 	ResourceLoader.load_threaded_request(target)
 
+
+func _on_message(text: String):
+	queue.append(text)
+	idle_time = 0.0
+
+
 func _process(delta):
+	if initializing:
+		_process_init(delta)
+		return
 	if target == \"\" or done:
 		return
 	elapsed += delta
@@ -38,6 +66,7 @@ func _process(delta):
 	var status = ResourceLoader.load_threaded_get_status(target, progress)
 
 	if status == ResourceLoader.THREAD_LOAD_FAILED or status == ResourceLoader.THREAD_LOAD_INVALID_RESOURCE:
+		status_label.text = \"Failed to load \" + map_name
 		push_error(\"Failed to load \" + target)
 		done = true
 		get_tree().change_scene_to_file(\"res://scenes/StartingMenu/selection_menu.tscn\")
@@ -47,10 +76,47 @@ func _process(delta):
 	shown = move_toward(shown, real, (100.0 / MIN_SHOW_SEC) * delta)
 	bar.value = shown
 
+	var dots := \".\".repeat(int(elapsed * 2.0) % 4)
+	if real >= 100.0:
+		status_label.text = \"Finalizing \" + map_name + dots
+	else:
+		status_label.text = \"Loading %s%s  (%d%%)\" % [map_name, dots, int(shown)]
+
 	if status == ResourceLoader.THREAD_LOAD_LOADED and shown >= 100.0 and elapsed >= MIN_SHOW_SEC:
 		done = true
-		var packed = ResourceLoader.load_threaded_get(target)
-		get_tree().change_scene_to_packed(packed)
+		_start_init(ResourceLoader.load_threaded_get(target))
+
+
+func _start_init(packed: PackedScene):
+	# lift the loading screen above everything the map might draw
+	layer = CanvasLayer.new()
+	layer.layer = 100
+	get_tree().root.add_child(layer)
+	reparent(layer)
+
+	status_label.text = \"Initializing...\"
+	initializing = true
+
+	# the map's _ready() runs now, and its LoadStatus.report() calls land in the queue
+	var map := packed.instantiate()
+	get_tree().root.add_child(map)
+	get_tree().current_scene = map
+
+
+func _process_init(delta):
+	init_time += delta
+	msg_timer -= delta
+
+	if msg_timer <= 0.0 and not queue.is_empty():
+		status_label.text = queue.pop_front()
+		msg_timer = MSG_SEC
+		idle_time = 0.0
+	elif queue.is_empty():
+		idle_time += delta
+
+	if (queue.is_empty() and idle_time >= SETTLE_SEC) or init_time >= MAX_INIT_SEC:
+		initializing = false
+		layer.queue_free()   # frees the loading screen with it
 "
 
 [node name="LoadingScreen" type="Control" unique_id=665973379]
@@ -93,6 +159,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
+offset_left = -305.0
+offset_top = -214.0
+offset_right = 295.0
+offset_bottom = 136.0
 grow_horizontal = 2
 grow_vertical = 2
 stream = ExtResource("1_w4mdj")
@@ -100,3 +170,15 @@ volume_db = -80.0
 autoplay = true
 expand = true
 loop = true
+
+[node name="StatusLabel" type="Label" parent="." unique_id=1579469991]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 314.0
+offset_top = 485.0
+offset_right = 841.0
+offset_bottom = 531.0
+theme_override_fonts/font = ExtResource("2_w5d26")
+theme_override_font_sizes/font_size = 20
+horizontal_alignment = 1
+vertical_alignment = 1

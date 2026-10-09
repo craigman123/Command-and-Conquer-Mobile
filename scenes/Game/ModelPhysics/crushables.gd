@@ -20,6 +20,7 @@ func _ready() -> void:
 					n += 1
 	if debug_print:
 		print("crushables: set up ", n, " cacti")
+		LoadStatus.report("Planting %d cacti's..." % n)
 
 
 func _find_cacti(holder: Node3D) -> Array:
