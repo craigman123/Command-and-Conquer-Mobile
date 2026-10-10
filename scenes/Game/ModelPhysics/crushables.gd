@@ -12,6 +12,10 @@ extends Node3D
 @export var min_trigger_size := 1.0
 
 func _ready() -> void:
+	for holder in get_children():
+		if holder is Node3D:
+			_strip_physics(holder)
+
 	var n := 0
 	for holder in get_children():
 		if holder is Node3D:
@@ -69,9 +73,6 @@ func _make_crushable(cactus: Node3D) -> bool:
 		maxf(box.size.z * shape_scale, min_trigger_size))
 	var cs := CollisionShape3D.new()
 	cs.shape = shape
-	
-	for co in cactus.find_children("*", "CollisionObject3D", true, false):
-		co.queue_free()
 
 	var area := Area3D.new()
 	area.collision_layer = 0
@@ -114,3 +115,16 @@ func _on_body_entered(body: Node3D, cactus: Node3D, area: Area3D) -> void:
 		tween.tween_interval(remove_after)
 		tween.tween_property(cactus, "global_position:y", -1.5, 0.5).as_relative()
 		tween.tween_callback(cactus.queue_free)
+		
+func _strip_physics(root: Node3D) -> void:
+	var bodies: Array = root.find_children("*", "CollisionObject3D", true, false)
+	if root is CollisionObject3D:
+		bodies.append(root)
+	for co in bodies:
+		co.collision_layer = 0
+		co.collision_mask = 0
+		if co is RigidBody3D:
+			co.freeze = true          # stops it falling or being simulated
+			co.gravity_scale = 0.0
+		for s in co.find_children("*", "CollisionShape3D", true, false):
+			s.queue_free()            # removes the shape from the physics world

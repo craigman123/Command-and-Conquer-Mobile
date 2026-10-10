@@ -1,0 +1,10 @@
+[gd_resource type="StandardMaterial3D" format=3 uid="uid://bph78d05cdlfg"]
+
+[ext_resource type="Texture2D" uid="uid://cpwqakms5ywbe" path="res://assets/models/Units/Vehicles/TechnicalPickup/TechnicalPickup_Material.png" id="1_q3jdc"]
+
+[resource]
+resource_name = "Material.001"
+cull_mode = 2
+shading_mode = 0
+albedo_texture = ExtResource("1_q3jdc")
+metadata/_gltf_primary_texture_coord = 0

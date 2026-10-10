@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://ddqdk1x8fhw3n"]
 
 [ext_resource type="Script" uid="uid://d37v3qk78seth" path="res://assets/models/Units/Tanks/tiger_tank.gd" id="1_0iytv"]
+[ext_resource type="Script" uid="uid://dl1srcsj73xbm" path="res://scripts/DrivingSkills/tracked_driving.gd" id="2_wg8d1"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_4kxuq"]
 size = Vector3(3, 1, 4)
@@ -11,17 +12,17 @@ size = Vector3(3, 1, 4)
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_mti6b"]
 albedo_color = Color(0.13319641, 0.13319641, 0.13319638, 1)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_emhk3"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_htvbo"]
 shading_mode = 0
 albedo_color = Color(0.24313726, 1, 1, 1)
 
 [sub_resource type="TorusMesh" id="TorusMesh_4hed1"]
-material = SubResource("StandardMaterial3D_emhk3")
+material = SubResource("StandardMaterial3D_htvbo")
 inner_radius = 2.05
 outer_radius = 2.0
 ring_segments = 12
 
-[node name="Tank" type="CharacterBody3D" unique_id=861627520 groups=["units"]]
+[node name="Tank" type="CharacterBody3D" unique_id=507133026 groups=["team_ally", "units"]]
 script = ExtResource("1_0iytv")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1838979250]
@@ -39,3 +40,6 @@ surface_material_override/0 = SubResource("StandardMaterial3D_mti6b")
 transform = Transform3D(1.4, 0, 0, 0, 1.4, 0, 0, 0, 1.4, 0, 0.05, 0)
 cast_shadow = 0
 mesh = SubResource("TorusMesh_4hed1")
+
+[node name="Driving" type="Node3D" parent="." unique_id=870572015]
+script = ExtResource("2_wg8d1")

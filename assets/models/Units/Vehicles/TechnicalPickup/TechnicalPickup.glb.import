@@ -1,0 +1,138 @@
+[remap]
+
+importer="scene"
+importer_version=1
+type="PackedScene"
+uid="uid://ckqpo6gvwjeyl"
+path="res://.godot/imported/TechnicalPickup.glb-fe916f63ef7d989f34eefcbb1c6550bb.scn"
+
+[deps]
+
+source_file="res://assets/models/Units/Vehicles/TechnicalPickup/TechnicalPickup.glb"
+dest_files=["res://.godot/imported/TechnicalPickup.glb-fe916f63ef7d989f34eefcbb1c6550bb.scn"]
+
+[params]
+
+nodes/root_type=""
+nodes/root_name=""
+nodes/root_script=null
+mesh_library/use_node_names_as_mesh_names=false
+array_mesh/deduplicate_surfaces=true
+nodes/apply_root_scale=true
+nodes/root_scale=1.0
+nodes/import_as_skeleton_bones=false
+nodes/use_name_suffixes=true
+nodes/use_node_type_suffixes=true
+meshes/ensure_tangents=true
+meshes/generate_lods=true
+meshes/create_shadow_meshes=true
+meshes/light_baking=1
+meshes/lightmap_texel_size=0.2
+meshes/force_disable_compression=false
+skins/use_named_skins=true
+animation/import=true
+animation/fps=30
+animation/trimming=false
+animation/remove_immutable_tracks=true
+animation/import_rest_as_RESET=false
+import_script/path=""
+materials/extract=0
+materials/extract_format=0
+materials/extract_path=""
+_subresources={
+"materials": {
+"Details": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://assets/models/Units/Vehicles/TechnicalPickup/metrials/Details.tres",
+"use_external/path": "uid://b46fpdmcpfhby"
+},
+"Material.001": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://assets/models/Units/Vehicles/TechnicalPickup/metrials/Material.001.tres",
+"use_external/path": "uid://bph78d05cdlfg"
+},
+"Material.002": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://assets/models/Units/Vehicles/TechnicalPickup/metrials/Material.002.tres",
+"use_external/path": "uid://coij7v7v0b4ca"
+},
+"Material.003": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://assets/models/Units/Vehicles/TechnicalPickup/metrials/Material.003.tres",
+"use_external/path": "uid://c8uqdijr3rc1x"
+},
+"Material.004": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://assets/models/Units/Vehicles/TechnicalPickup/metrials/Material.004.tres",
+"use_external/path": "uid://bjm0xsdoe4tno"
+},
+"Material.006": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://assets/models/Units/Vehicles/TechnicalPickup/metrials/Material.006.tres",
+"use_external/path": "uid://cmbpuccbmbejy"
+},
+"Material.008": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://assets/models/Units/Vehicles/TechnicalPickup/metrials/Material.008.tres",
+"use_external/path": "uid://c882ke0ffeefj"
+},
+"Material.009": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://assets/models/Units/Vehicles/TechnicalPickup/metrials/Material.009.tres",
+"use_external/path": "uid://cakatl5ujelid"
+},
+"Material.010": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://assets/models/Units/Vehicles/TechnicalPickup/metrials/Material.010.tres",
+"use_external/path": "uid://b0snrre3en8d6"
+},
+"Material.029": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://assets/models/Units/Vehicles/TechnicalPickup/metrials/Material.029.tres",
+"use_external/path": "uid://dgy2ewho76sg7"
+},
+"Material.031": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://assets/models/Units/Vehicles/TechnicalPickup/metrials/Material.031.tres",
+"use_external/path": "uid://c1w2ulme5bf6q"
+},
+"Material.032": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://assets/models/Units/Vehicles/TechnicalPickup/metrials/Material.032.tres",
+"use_external/path": "uid://bmrmo08ttyx7i"
+},
+"Material.033": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://assets/models/Units/Vehicles/TechnicalPickup/metrials/Material.033.tres",
+"use_external/path": "uid://djwv18i25t1k6"
+},
+"Material.034": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://assets/models/Units/Vehicles/TechnicalPickup/metrials/Material.034.tres",
+"use_external/path": "uid://b7v6n2fi42y0a"
+},
+"Material.035": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://assets/models/Units/Vehicles/TechnicalPickup/metrials/Material.035.tres",
+"use_external/path": "uid://dl8bq3krgo7gh"
+},
+"Material.036": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://assets/models/Units/Vehicles/TechnicalPickup/metrials/Material.036.tres",
+"use_external/path": "uid://dqruyt0ie8xo0"
+},
+"Material.037": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://assets/models/Units/Vehicles/TechnicalPickup/metrials/Material.037.tres",
+"use_external/path": "uid://3e8rttkv1iil"
+},
+"material": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://assets/models/Units/Vehicles/TechnicalPickup/metrials/material.tres",
+"use_external/path": "uid://dfr0pue136i42"
+}
+}
+}
+gltf/naming_version=2
+gltf/embedded_image_handling=1
+gltf/texture_map_mode=1

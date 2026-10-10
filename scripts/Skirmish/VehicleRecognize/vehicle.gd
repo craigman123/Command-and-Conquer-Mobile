@@ -1,6 +1,36 @@
 class_name VehicleBase
 extends CharacterBody3D
 
+@export_group("Driving")
+var driver: Node = null
+
+@export_group("Sound")
+@export var sound_enabled := true
+@export var sfx_dir := "res://assets/sounds/Units/"
+@export var engine_start_file := "EngineStarting/engine_start.ogg"
+@export var engine_idle_file := "EngineIdle/engine_idle.ogg"
+@export var engine_off_file := "EngineOff/engine_off.ogg"
+@export var fire_file := "GunMachine/gun_machine.ogg"
+@export var explosion_file := "Explosion/explosion.ogg"
+@export var engine_volume_db := -6.0
+@export var gun_volume_db := 0.0
+@export var idle_pitch := 0.9          # engine pitch when standing still (1.0 = recording as is)
+@export var max_pitch := 1.6           # engine pitch at full speed
+@export var engine_off_delay := 6.0    # seconds standing still before the engine switches off
+@export var sound_unit_size := 20.0    # how far the sound carries at full volume
+@export var sound_max_distance := 150.0
+@export var engine_start_delay := 1.0
+
+enum EngineState { OFF, STARTING, RUNNING }
+var engine_state := EngineState.OFF
+var engine_timer := 0.0
+var idle_time := 0.0
+var snd_start: AudioStreamPlayer3D
+var snd_idle: AudioStreamPlayer3D
+var snd_off: AudioStreamPlayer3D
+var snd_gun: AudioStreamPlayer3D
+var _idle_tw: Tween
+
 @export_group("Common")
 @export var speed := 10.0
 @export var acceleration := 12.0
@@ -10,14 +40,33 @@ extends CharacterBody3D
 @export var vision_range := 30.0
 @export var forward_is_plus_z := true
 
+@export_group("Combat")
+@export var faction := "heroes"
+@export var max_health := 100.0
+@export var attack_range := 18.0
+@export var attack_damage := 8.0
+@export var fire_interval := 0.8
+@export var muzzle_height := 1.4      # how high the gun is above the vehicle's centre
+@export var muzzle_forward := 1.2     # how far in front of the centre the shots start
+@export var wreck_time := 30.0        # seconds the wreck stays before it's removed
+@export var burst_size := 5        # shots per burst
+@export var burst_delay := 0.3     # pause after each burst
+
+var burst_left := 0
+var dead := false
+var health := 0.0
+var combat_target: Node3D = null
+var fire_cooldown := 0.0
+var scan_timer := 0.0
+
 @export_group("Dust")
 @export var dust_enabled := true
 @export var dust_offset := Vector3(0.0, 0.3, -2.0)  
-@export var dust_max_amount := 80        
+@export var dust_max_amount := 24        
 @export var dust_min_speed := 2.0
 @export var default_dust_color := Color(0.85, 0.74, 0.52, 0.45)
 @export var terrain_dust: Dictionary = {}
-@export var dust_lifetime = 2.0
+@export var dust_lifetime = 0.5
 
 var dust: GPUParticles3D
 var dust_pm: ParticleProcessMaterial
@@ -86,11 +135,19 @@ var smoke: GPUParticles3D
 var model_base_basis := Basis.IDENTITY
 var ground_normal := Vector3.UP
 
-
 func _ready():
-	add_to_group("player_units")
+	print(name, " faction=", faction, " player=", GameState.player_faction)
+	health = max_health
 	add_to_group("units")
 	add_to_group("vehicles")
+	add_to_group("player_units" if faction == GameState.player_faction else "enemy_units")
+	
+	for c in get_children():
+		if c.has_method("drive"):
+			driver = c
+			driver.setup(self)
+			break
+			
 	set_selected(false)
 	
 	if dust_enabled:
@@ -100,6 +157,9 @@ func _ready():
 		model = _find_model()
 	if model:
 		model_base_basis = model.basis
+		
+	if sound_enabled:
+		_setup_sound()
 
 	floor_snap_length = 0.6
 	floor_max_angle = deg_to_rad(50.0)
@@ -110,6 +170,13 @@ func _ready():
 	await get_tree().physics_frame
 	await get_tree().physics_frame
 	nav_ready = true
+	
+	if not CombatVFX.warmed:
+		CombatVFX.warmed = true      # only the first vehicle does it, once
+		_warm_vfx.call_deferred()
+		
+func _warm_vfx():
+	CombatVFX.warm_up(self)
 
 
 func _find_model() -> Node3D:
@@ -125,6 +192,10 @@ func set_selected(value: bool):
 
 
 func move_to(pos: Vector3):
+	if dead:
+		return
+	if driver and driver.has_method("on_new_order"):
+		driver.on_new_order()
 	if not nav_ready:
 		return
 	var map := agent.get_navigation_map()
@@ -149,17 +220,78 @@ func _physics_process(delta):
 
 	_update_target()
 	_update_force(delta)
-	_drive(delta)          # <- each vehicle type implements this
+	_drive(delta) 
+	_update_combat(delta)
+	_update_engine(delta)
 	_apply_motion()
 	_update_smoke()
 	_update_dust(delta)
 	move_and_slide()
 	_update_tilt(delta)
 
+func take_damage(amount: float):
+	if dead:
+		return
+	health -= amount
+	CombatVFX.impact(self, global_position + Vector3.UP * 1.0)
+	if health <= 0.0:
+		_die()
+
+func _update_combat(delta: float):
+	fire_cooldown = maxf(fire_cooldown - delta, -fire_interval)
+	scan_timer -= delta
+
+	if scan_timer <= 0.0:
+		scan_timer = 0.5
+		if not is_instance_valid(combat_target) or combat_target.dead \
+		or global_position.distance_to(combat_target.global_position) > vision_range:
+			combat_target = _find_enemy()
+
+	if not is_instance_valid(combat_target) or combat_target.dead:
+		burst_left = 0
+		return
+
+	var dist := global_position.distance_to(combat_target.global_position)
+
+	if dist <= attack_range and fire_cooldown <= 0.0:
+		if burst_left <= 0:
+			burst_left = burst_size
+			_play_gun()                      # sound once per burst
+		burst_left -= 1
+		fire_cooldown += burst_delay if burst_left <= 0 else fire_interval
+
+		var muzzle := global_position + Vector3.UP * muzzle_height + _forward() * muzzle_forward
+		var hit_pos := combat_target.global_position + Vector3.UP * 1.0
+		CombatVFX.muzzle_flash(self, muzzle, (hit_pos - muzzle).normalized())
+		CombatVFX.tracer(self, muzzle, hit_pos)
+		combat_target.take_damage(attack_damage)
+
+	if is_in_group("enemy_units"):
+		if dist > attack_range * 0.8:
+			if path_index >= path.size():
+				move_to(combat_target.global_position)
+		else:
+			_stop_near()
+
+func _find_enemy() -> Node3D:
+	var best: Node3D = null
+	var best_dist := vision_range
+	for u in get_tree().get_nodes_in_group("units"):
+		if u == self or u.faction == faction:
+			continue
+		var d := global_position.distance_to(u.global_position)
+		if d < best_dist:
+			best_dist = d
+			best = u
+	return best
 
 # override this in WheeledVehicle / TrackedVehicle / etc.
-func _drive(_delta: float):
-	pass
+func _drive(delta: float):
+	if sound_enabled and engine_state == EngineState.STARTING:
+		current_speed = 0.0
+		return
+	if driver:
+		driver.drive(delta)
 
 
 func _update_target():
@@ -492,8 +624,8 @@ func request_make_way(requester: Node3D, their_dir: Vector3):
 		return
 	if path_index < path.size():
 		return                                  # we have our own orders, stay put
-	if not (requester.is_in_group("player_units") and is_in_group("player_units")):
-		return                                  # only allies yield
+	if requester.faction != faction:
+		return                                     # only allies yield
 
 	var dir := their_dir
 	dir.y = 0.0
@@ -672,3 +804,149 @@ func _terrain_texture_id() -> int:
 		return -1
 	var t = data.get_texture_id(global_position)   # Vector3: base id, overlay id, blend
 	return int(t.x) if t.z < 0.5 else int(t.y)
+	
+func _die():
+	dead = true
+	_stop_all_sound()
+	_play_explosion_sound()
+	for g in ["units", "vehicles", "player_units", "enemy_units"]:
+		remove_from_group(g)
+	set_selected(false)
+	current_speed = 0.0
+	velocity = Vector3.ZERO
+	if dust:
+		dust.emitting = false
+	if smoke:
+		smoke.emitting = false
+
+	var pos := global_position + Vector3.UP * 0.8
+	CombatVFX.explosion(self, pos)
+	CombatVFX.wreck_smoke(self, pos)
+
+	# char every mesh with a dark see-through layer on top of its normal material
+	_char_meshes(self, CombatVFX.burnt_material())
+
+	set_physics_process(false)    # stops driving, shooting and gravity
+	await get_tree().create_timer(wreck_time).timeout
+	queue_free()
+
+
+func _char_meshes(n: Node, mat: Material):
+	if n is MeshInstance3D:
+		n.material_overlay = mat
+	for c in n.get_children():
+		_char_meshes(c, mat)
+		
+# ---------- SOUND ----------
+
+func _make_player(file: String, vol: float, polyphony := 1) -> AudioStreamPlayer3D:
+	var path := sfx_dir + file
+	if not ResourceLoader.exists(path):
+		push_warning("Missing sound file: " + path)
+		return null
+	var p := AudioStreamPlayer3D.new()
+	p.stream = load(path)
+	p.volume_db = vol
+	p.unit_size = sound_unit_size
+	p.max_distance = sound_max_distance
+	p.max_polyphony = polyphony    # how many copies of this sound may overlap
+	add_child(p)
+	return p
+
+
+func _setup_sound():
+	snd_start = _make_player(engine_start_file, engine_volume_db)
+	snd_idle = _make_player(engine_idle_file, engine_volume_db)
+	snd_off = _make_player(engine_off_file, engine_volume_db)
+	snd_gun = _make_player(fire_file, gun_volume_db, 3)
+	# the idle must repeat forever
+	if snd_idle and snd_idle.stream is AudioStreamOggVorbis:
+		(snd_idle.stream as AudioStreamOggVorbis).loop = true
+	print(name, " sound: start=", snd_start, " idle=", snd_idle, " gun=", snd_gun)
+
+
+func _update_engine(delta: float):
+	if not sound_enabled or dead:
+		return
+	var moving := has_target or absf(current_speed) > 0.5
+
+	match engine_state:
+		EngineState.OFF:
+			if moving:
+				_engine_start()
+
+		EngineState.STARTING:
+			engine_timer -= delta
+			if engine_timer <= 0.0:
+				engine_state = EngineState.RUNNING
+				idle_time = 0.0
+				_idle_fade(engine_volume_db, 0.4)   # idle fades in as the start sound ends
+
+		EngineState.RUNNING:
+			var ratio := clampf(absf(current_speed) / speed, 0.0, 1.0)
+			if snd_idle:
+				snd_idle.pitch_scale = lerpf(idle_pitch, max_pitch, ratio)
+			if moving:
+				idle_time = 0.0
+			else:
+				idle_time += delta
+				if idle_time >= engine_off_delay:
+					_engine_stop()
+
+func _engine_start():
+	engine_state = EngineState.STARTING
+	if snd_off:
+		snd_off.stop()
+	var length := 0.5
+	if snd_start:
+		snd_start.play()
+		length = snd_start.stream.get_length()
+	var wait := length if engine_start_delay < 0.0 else engine_start_delay
+	engine_timer = maxf(wait, 0.1)
+
+func _engine_stop():
+	engine_state = EngineState.OFF
+	_idle_fade(-40.0, 0.2, true)
+	if snd_off:
+		snd_off.play()
+
+
+# Fades the idle loop's volume. With stop_after it stops the sound once it's silent.
+func _idle_fade(to_db: float, time: float, stop_after := false):
+	if snd_idle == null:
+		return
+	if _idle_tw and _idle_tw.is_valid():
+		_idle_tw.kill()
+	if not snd_idle.playing:
+		snd_idle.volume_db = -40.0
+		snd_idle.play()
+	_idle_tw = create_tween()
+	_idle_tw.tween_property(snd_idle, "volume_db", to_db, time)
+	if stop_after:
+		_idle_tw.tween_callback(snd_idle.stop)
+
+
+func _play_gun():
+	if snd_gun == null:
+		return
+	snd_gun.pitch_scale = randf_range(0.92, 1.08)   # a tiny change each shot, so it doesn't sound robotic
+	snd_gun.play()
+
+
+func _stop_all_sound():
+	for p in [snd_start, snd_idle, snd_off]:
+		if p:
+			p.stop()
+
+func _play_explosion_sound():
+	var path := sfx_dir + explosion_file
+	if not ResourceLoader.exists(path):
+		return
+	var p := AudioStreamPlayer3D.new()
+	p.stream = load(path)
+	p.unit_size = sound_unit_size * 1.5
+	p.max_distance = sound_max_distance * 1.5
+	p.volume_db = 3.0
+	add_child(p)
+	p.play()
+	p.finished.connect(p.queue_free)

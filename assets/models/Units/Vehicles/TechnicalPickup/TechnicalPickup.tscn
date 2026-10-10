@@ -1,0 +1,40 @@
+[gd_scene format=3 uid="uid://cp6u7lkne8bb8"]
+
+[ext_resource type="PackedScene" uid="uid://ckqpo6gvwjeyl" path="res://assets/models/Units/Vehicles/TechnicalPickup/TechnicalPickup.glb" id="1_biug1"]
+[ext_resource type="Script" uid="uid://dc1qncy82k3xf" path="res://assets/models/Units/Vehicles/TechnicalPickup/technical_pickup.gd" id="1_sb8ft"]
+[ext_resource type="Script" uid="uid://codfabqsv077j" path="res://scripts/DrivingSkills/wheeled_driving.gd" id="3_dskn3"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_dskn3"]
+size = Vector3(1.3699341, 1.1094971, 3.9828186)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_emhk3"]
+shading_mode = 0
+albedo_color = Color(0.24313726, 1, 1, 1)
+
+[sub_resource type="TorusMesh" id="TorusMesh_sb8ft"]
+material = SubResource("StandardMaterial3D_emhk3")
+inner_radius = 2.05
+outer_radius = 2.0
+ring_segments = 12
+
+[node name="TechnicalPickup" type="CharacterBody3D" unique_id=27427195]
+script = ExtResource("1_sb8ft")
+faction = "villians"
+
+[node name="TechnicalPickup" parent="." unique_id=1948958019 instance=ExtResource("1_biug1")]
+transform = Transform3D(0.7, 0, 0, 0, 0.7, 0, 0, 0, 0.7, -0.018893957, 1.1920929e-07, -0.0029489994)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=476606443]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.030860782, 0.55474854, -0.044662476)
+shape = SubResource("BoxShape3D_dskn3")
+
+[node name="NavigationAgent3D" type="NavigationAgent3D" parent="." unique_id=604683971]
+
+[node name="Driving" type="Node3D" parent="." unique_id=1367931070]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.23027813, 0, 0)
+script = ExtResource("3_dskn3")
+
+[node name="SelectionRing" type="MeshInstance3D" parent="." unique_id=1128632223]
+transform = Transform3D(1.2, 0, 0, 0, 1.2, 0, 0, 0, 1.2, 0, 0.05, 0)
+cast_shadow = 0
+mesh = SubResource("TorusMesh_sb8ft")

@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://dhpfa0wvoyl0o" path="res://assets/models/Units/Vehicles/Humvee/humvee.gd" id="1_xpkh7"]
 [ext_resource type="PackedScene" uid="uid://nf6j8o8gd5a" path="res://assets/models/Units/Vehicles/Humvee/humvee.glb" id="2_y83df"]
+[ext_resource type="Script" uid="uid://codfabqsv077j" path="res://scripts/DrivingSkills/wheeled_driving.gd" id="3_y83df"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_n864j"]
 size = Vector3(2, 1, 3)
@@ -16,10 +17,10 @@ inner_radius = 2.05
 outer_radius = 2.0
 ring_segments = 12
 
-[node name="Humvee" type="CharacterBody3D" unique_id=1880719621 groups=["units"]]
+[node name="Humvee" type="CharacterBody3D" unique_id=58840557 groups=["units"]]
 script = ExtResource("1_xpkh7")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1955055856]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1955055856 groups=["team_ally"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
 shape = SubResource("BoxShape3D_n864j")
 
@@ -32,3 +33,6 @@ mesh = SubResource("TorusMesh_y83df")
 
 [node name="humvee" parent="." unique_id=1795825859 instance=ExtResource("2_y83df")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.01, 0)
+
+[node name="Driving" type="Node3D" parent="." unique_id=21853859]
+script = ExtResource("3_y83df")

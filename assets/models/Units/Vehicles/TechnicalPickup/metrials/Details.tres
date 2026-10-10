@@ -1,0 +1,19 @@
+[gd_resource type="StandardMaterial3D" format=3 uid="uid://b46fpdmcpfhby"]
+
+[ext_resource type="Texture2D" uid="uid://bbioxg06jhqf" path="res://assets/models/Units/Vehicles/TechnicalPickup/TechnicalPickup_Details_baseColor.png" id="1_2lrf3"]
+[ext_resource type="Texture2D" uid="uid://c73beay1omb38" path="res://assets/models/Units/Vehicles/TechnicalPickup/TechnicalPickup_Details_metallicRoughness.png" id="2_mht20"]
+[ext_resource type="Texture2D" uid="uid://cy58hc6w064j8" path="res://assets/models/Units/Vehicles/TechnicalPickup/TechnicalPickup_Details_normal.png" id="3_x4ob5"]
+
+[resource]
+resource_name = "Details"
+albedo_texture = ExtResource("1_2lrf3")
+metallic = 1.0
+metallic_texture = ExtResource("2_mht20")
+metallic_texture_channel = 2
+roughness_texture = ExtResource("2_mht20")
+roughness_texture_channel = 1
+normal_enabled = true
+normal_texture = ExtResource("3_x4ob5")
+ao_enabled = true
+ao_texture = ExtResource("2_mht20")
+metadata/_gltf_primary_texture_coord = 0

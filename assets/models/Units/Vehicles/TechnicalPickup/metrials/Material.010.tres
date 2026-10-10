@@ -1,0 +1,10 @@
+[gd_resource type="StandardMaterial3D" format=3 uid="uid://b0snrre3en8d6"]
+
+[ext_resource type="Texture2D" uid="uid://8jd81dn44dbc" path="res://assets/models/Units/Vehicles/TechnicalPickup/TechnicalPickup_Material_7.png" id="1_pdji3"]
+
+[resource]
+resource_name = "Material.010"
+cull_mode = 2
+shading_mode = 0
+albedo_texture = ExtResource("1_pdji3")
+metadata/_gltf_primary_texture_coord = 0
