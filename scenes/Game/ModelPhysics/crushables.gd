@@ -9,7 +9,7 @@ extends Node3D
 @export var sink_depth := 0.1
 @export var remove_after := 3.0
 @export var debug_print := true
-
+@export var min_trigger_size := 1.0
 
 func _ready() -> void:
 	var n := 0
@@ -62,11 +62,16 @@ func _make_crushable(cactus: Node3D) -> bool:
 	if box.size == Vector3.ZERO:
 		return false
 
-	var shape := CylinderShape3D.new()
-	shape.radius = maxf(0.1, minf(box.size.x, box.size.z) * 0.5 * shape_scale)
-	shape.height = maxf(0.1, box.size.y)
+	var shape := BoxShape3D.new()
+	shape.size = Vector3(
+		maxf(box.size.x * shape_scale, min_trigger_size),
+		maxf(box.size.y, 0.1),
+		maxf(box.size.z * shape_scale, min_trigger_size))
 	var cs := CollisionShape3D.new()
 	cs.shape = shape
+	
+	for co in cactus.find_children("*", "CollisionObject3D", true, false):
+		co.queue_free()
 
 	var area := Area3D.new()
 	area.collision_layer = 0

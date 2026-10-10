@@ -12,6 +12,7 @@ func _init():
 	forward_is_plus_z = false                  # the tank model faces -Z
 	speed = 5.0
 	smoke_offset = Vector3(0.0, 0.7, 2.3)      # exhaust at the rear (+Z for this model)
+	dust_offset = Vector3(0.0, 0.3, 2.5)
 
 
 func _drive(delta: float):
@@ -19,12 +20,21 @@ func _drive(delta: float):
 	var steer_angle := 0.0
 
 	if has_target:
-		reversing = false
 		var angle := _forward().signed_angle_to(target_dir, Vector3.UP)  # + = target is to the left
-		steer_angle = angle
-		target_speed = speed
-		if absf(angle) > deg_to_rad(pivot_angle_degrees):
-			target_speed = 0.0                 # turn on the spot first
+		if force_active:
+			reversing = force_dir < 0.0
+			if reversing:
+				steer_angle = wrapf(angle - PI, -PI, PI)
+				target_speed = -speed * 0.6
+			else:
+				steer_angle = angle
+				target_speed = speed            # no stopping to pivot while forcing
+		else:
+			reversing = false
+			steer_angle = angle
+			target_speed = speed
+			if absf(angle) > deg_to_rad(pivot_angle_degrees):
+				target_speed = 0.0                # turn on the spot first
 
 		# brake near the end of the path
 		if is_last_waypoint and target_dist < slow_down_distance:

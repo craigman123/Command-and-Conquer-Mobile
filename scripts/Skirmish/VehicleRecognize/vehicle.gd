@@ -10,6 +10,21 @@ extends CharacterBody3D
 @export var vision_range := 30.0
 @export var forward_is_plus_z := true
 
+@export_group("Dust")
+@export var dust_enabled := true
+@export var dust_offset := Vector3(0.0, 0.3, -2.0)  
+@export var dust_max_amount := 80        
+@export var dust_min_speed := 2.0
+@export var default_dust_color := Color(0.85, 0.74, 0.52, 0.45)
+@export var terrain_dust: Dictionary = {}
+@export var dust_lifetime = 2.0
+
+var dust: GPUParticles3D
+var dust_pm: ParticleProcessMaterial
+var dust_color := Color(0.8, 0.7, 0.5, 0.55)
+var terrain_node: Node
+var terrain_checked := false
+
 @export_group("Avoidance")
 @export var whisker_length := 6.0
 @export var whisker_angle := 35.0
@@ -29,6 +44,20 @@ var stuck_cooldown := 0.0
 @export var smoke_enabled := true
 @export var smoke_offset := Vector3(0.0, 0.7, -2.3)
 @export var smoke_max_amount := 40
+
+@export_group("Force Through")
+@export var force_stuck_time := 2.0
+@export var force_stuck_radius := 1.5
+@export var force_max_time := 3.0
+@export var force_escape_distance := 3.0
+
+var force_active := false
+var force_dir := 1.0        
+var force_timer := 0.0
+var force_elapsed := 0.0
+var force_anchor := Vector3.ZERO
+var force_start := Vector3.ZERO
+var force_flip := false
 
 @onready var agent: NavigationAgent3D = $NavigationAgent3D
 @onready var ring: Node3D = $SelectionRing
@@ -63,6 +92,9 @@ func _ready():
 	add_to_group("units")
 	add_to_group("vehicles")
 	set_selected(false)
+	
+	if dust_enabled:
+		_setup_dust()
 
 	if model == null:
 		model = _find_model()
@@ -100,6 +132,7 @@ func move_to(pos: Vector3):
 	path = NavigationServer3D.map_get_path(map, global_position, closest, true)
 	path_index = 0
 	reversing = false
+	_reset_force()
 
 
 func _forward() -> Vector3:
@@ -115,9 +148,11 @@ func _physics_process(delta):
 		velocity.y -= 20.0 * delta
 
 	_update_target()
+	_update_force(delta)
 	_drive(delta)          # <- each vehicle type implements this
 	_apply_motion()
 	_update_smoke()
+	_update_dust(delta)
 	move_and_slide()
 	_update_tilt(delta)
 
@@ -160,6 +195,8 @@ func _apply_motion():
 # call every frame. Returns true while the vehicle should be backing out of
 # a stuck spot, so the driving script can override its speed / steering.
 func _update_stuck(delta: float, target_speed: float, unstick_seconds := 1.2) -> bool:
+	if force_active:
+		return false
 	stuck_cooldown = maxf(stuck_cooldown - delta, 0.0)
 	var unsticking := unstick_time > 0.0
 	if unsticking:
@@ -287,6 +324,8 @@ func _avoid_obstacles() -> Array:
 			if blocker == null or hit_dist < blocker_dist:
 				blocker = root
 				blocker_dist = hit_dist
+			if force_active:
+				continue        # still remembered as blocker (make-way works), but no steering or slowing
 		danger[i] = d
 
 	# a unit is close by AND it's sitting on (or right next to) our destination:
@@ -342,9 +381,16 @@ func _update_tilt(delta: float):
 	if is_on_floor():
 		target_normal = get_floor_normal()
 	ground_normal = ground_normal.slerp(target_normal, clampf(tilt_speed * delta, 0.0, 1.0)).normalized()
-	var local_normal := global_transform.basis.orthonormalized().inverse() * ground_normal
+	var local_normal := (global_transform.basis.orthonormalized().inverse() * ground_normal).normalized()
 	var angle := Vector3.UP.angle_to(local_normal)
 	var max_angle := deg_to_rad(max_tilt_degrees)
+	if angle > max_angle:
+		var axis := Vector3.UP.cross(local_normal)
+		if axis.length() > 0.001:
+			local_normal = Vector3.UP.rotated(axis.normalized(), max_angle)
+		else:
+			local_normal = Vector3.UP
+	model.basis = Basis(Quaternion(Vector3.UP, local_normal)) * model_base_basis
 	if angle > max_angle:
 		local_normal = Vector3.UP.slerp(local_normal, max_angle / angle)
 	model.basis = Basis(Quaternion(Vector3.UP, local_normal)) * model_base_basis
@@ -462,3 +508,167 @@ func request_make_way(requester: Node3D, their_dir: Vector3):
 		side = -_freer_side(dir)                # perp is the right-hand side, _freer_side is +1 = left
 
 	move_to(global_position + perp * side * make_way_distance)
+	
+func _reset_force():
+	force_active = false
+	force_timer = 0.0
+	force_anchor = global_position
+
+func _update_force(delta: float):
+	if not has_target:
+		_reset_force()
+		return
+
+	if force_active:
+		force_elapsed += delta
+		if global_position.distance_to(force_start) > force_escape_distance:
+			force_flip = false
+			_reset_force()
+		elif force_elapsed > force_max_time:
+			force_flip = not force_flip      # didn't get anywhere: try the other direction next time
+			_reset_force()
+		return
+
+	if global_position.distance_to(force_anchor) > force_stuck_radius:
+		force_anchor = global_position
+		force_timer = 0.0           # it is moving: reset
+		return
+
+	force_timer += delta
+	if force_timer >= force_stuck_time:
+		force_active = true
+		force_elapsed = 0.0
+		force_start = global_position
+		var ang := _forward().signed_angle_to(target_dir, Vector3.UP)
+		force_dir = -1.0 if absf(ang) > deg_to_rad(100.0) else 1.0
+		if force_flip:
+			force_dir = -force_dir
+		unstick_time = 0.0          # cancel the old back-up routine
+		stuck_timer = 0.0
+		
+func _setup_dust():
+	dust = GPUParticles3D.new()
+	dust.position = dust_offset
+	dust.amount = dust_max_amount
+	dust.lifetime = dust_lifetime if dust_lifetime != null and dust_lifetime > 0.0 else 2.0
+	dust.local_coords = false
+	dust.emitting = false
+	dust.visibility_aabb = AABB(Vector3(-30, -5, -30), Vector3(60, 20, 60))
+	
+	dust.randomness = 1.0        # spreads particle spawn times so they don't come in clumps
+	dust.explosiveness = 0.0
+	dust.fixed_fps = 0           # smooth, not stepped
+	dust.interpolate = true
+
+	dust_pm = ParticleProcessMaterial.new()
+	dust_pm.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_BOX
+	dust_pm.emission_box_extents = Vector3(0.9, 0.05, 0.3)   # wide: one puff per rear wheel
+	dust_pm.direction = Vector3(0, 0.3, 0)
+	dust_pm.spread = 40.0
+	dust_pm.initial_velocity_min = 0.5
+	dust_pm.initial_velocity_max = 1.5
+	dust_pm.gravity = Vector3(0, 0.3, 0)
+	dust_pm.damping_min = 0.8
+	dust_pm.damping_max = 1.5
+	dust_pm.scale_min = 0.7
+	dust_pm.scale_max = 1.2
+	dust_pm.color = dust_color
+	dust_pm.angle_min = -180.0
+	dust_pm.angle_max = 180.0
+	dust_pm.scale_min = 1.8
+	dust_pm.scale_max = 3.2
+	dust_pm.initial_velocity_min = 0.3     
+	dust_pm.initial_velocity_max = 1.2
+	dust_pm.emission_box_extents = Vector3(1.1, 0.1, 0.6)
+
+	var sc := Curve.new()
+	sc.add_point(Vector2(0.0, 0.5))
+	sc.add_point(Vector2(1.0, 3.5))
+	var sct := CurveTexture.new()
+	sct.curve = sc
+	dust_pm.scale_curve = sct
+
+	var g := Gradient.new()
+	g.offsets = PackedFloat32Array([0.0, 0.25, 1.0])
+	g.colors = PackedColorArray([Color(1, 1, 1, 0.0), Color(1, 1, 1, 1.0), Color(1, 1, 1, 0.0)])
+	var gt := GradientTexture1D.new()
+	gt.gradient = g
+	dust_pm.color_ramp = gt
+	dust.process_material = dust_pm
+	
+	var pg := Gradient.new()
+	pg.offsets = PackedFloat32Array([0.0, 0.35, 0.7, 1.0])
+	pg.colors = PackedColorArray([
+		Color(1, 1, 1, 0.9),
+		Color(1, 1, 1, 0.55),
+		Color(1, 1, 1, 0.15),
+		Color(1, 1, 1, 0.0)])
+	var puff := GradientTexture2D.new()
+	puff.gradient = pg
+	puff.fill = GradientTexture2D.FILL_RADIAL
+	puff.fill_from = Vector2(0.5, 0.5)
+	puff.fill_to = Vector2(0.5, 0.0)
+	puff.width = 64
+	puff.height = 64
+	
+	g.offsets = PackedFloat32Array([0.0, 0.2, 0.7, 1.0])
+	g.colors = PackedColorArray([
+		Color(1, 1, 1, 0.0),
+		Color(1, 1, 1, 0.8),
+		Color(1, 1, 1, 0.4),
+		Color(1, 1, 1, 0.0)])
+
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.vertex_color_use_as_albedo = true
+	mat.albedo_texture = puff
+	mat.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
+	mat.billboard_keep_scale = true
+	var quad := QuadMesh.new()
+	quad.size = Vector2(1, 1)
+	quad.material = mat
+	dust.draw_pass_1 = quad
+	add_child(dust)
+
+
+func _update_dust(delta: float):
+	if dust == null:
+		return
+	var target := _ground_dust_color()
+	dust_color = dust_color.lerp(target, clampf(6.0 * delta, 0.0, 1.0))
+	dust_pm.color = dust_color
+
+	# dust comes from the back, or from the front while reversing
+	dust.position = Vector3(dust_offset.x, dust_offset.y, dust_offset.z * (-1.0 if reversing else 1.0))
+
+	var ratio := clampf(absf(current_speed) / speed, 0.0, 1.0)
+	dust.emitting = is_on_floor() and absf(current_speed) > dust_min_speed and target.a > 0.01
+	dust.amount_ratio = clampf(ratio * 1.2, 0.4, 1.0)
+
+
+func _ground_dust_color() -> Color:
+	var space := get_world_3d().direct_space_state
+	var q := PhysicsRayQueryParameters3D.create(global_position + Vector3.UP, global_position + Vector3.DOWN * 2.0)
+	q.exclude = [get_rid()]
+	q.collision_mask = 1                      # world only
+	var hit := space.intersect_ray(q)
+	if not hit.is_empty() and hit.collider is Node and hit.collider.is_in_group("no_dust"):
+		return Color(0, 0, 0, 0)
+	var id := _terrain_texture_id()
+	if terrain_dust.has(id):
+		return terrain_dust[id]
+	return default_dust_color
+
+
+func _terrain_texture_id() -> int:
+	if not terrain_checked:
+		terrain_checked = true
+		terrain_node = get_tree().root.find_child("Terrain3D", true, false)
+	if terrain_node == null:
+		return -1
+	var data = terrain_node.get("data")
+	if data == null:
+		return -1
+	var t = data.get_texture_id(global_position)   # Vector3: base id, overlay id, blend
+	return int(t.x) if t.z < 0.5 else int(t.y)

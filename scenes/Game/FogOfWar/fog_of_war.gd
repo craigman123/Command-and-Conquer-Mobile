@@ -78,7 +78,8 @@ func _ready() -> void:
 	var made := _ensure_blockers()
 	var bodies := get_tree().root.find_children("*", "StaticBody3D", true, false).size()
 	print("fog: colliders created=", made, "  static bodies in scene=", bodies)
-	LoadStatus.report("More Smooking: Created: %d || Bodies: %d" % [made, bodies])
+	var cover = made * bodies
+	LoadStatus.report("More Smoking: Created: %d " % cover)
 
 
 func _apply_episode_bounds() -> void:
@@ -96,7 +97,8 @@ func _apply_episode_bounds() -> void:
 		map_min = Vector2(fmin[0], fmin[1])
 		map_size = Vector2(fmax[0] - fmin[0], fmax[1] - fmin[1])
 		print("fog: applied min=", map_min, " size=", map_size)
-		LoadStatus.report("Smoking the Map: Min: %s || Size: %s" % [map_min, map_size])
+		var area := int(map_size.x * map_size.y)   # 600 x 600 = 360000
+		LoadStatus.report("Smoking the Map: Area: %d" % area)
 	else:
 		print("fog: JSON values missing or not [x, y] arrays -> using Inspector values")
 		LoadStatus.report("Smoker Failed!")
