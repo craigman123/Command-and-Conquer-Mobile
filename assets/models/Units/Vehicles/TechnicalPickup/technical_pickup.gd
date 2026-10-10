@@ -19,9 +19,9 @@ const MUZZLE_HEIGHT := 1.4
 const MUZZLE_FORWARD := 1.2
 const WRECK_TIME := 30.0
 
-const IDLE_PITCH := 6.0
+const IDLE_PITCH := 0.6
 const GUN_VOLUME_DB := 3.0
-const MAX_PITCH := 1.0
+const MAX_PITCH := 0.9
 
 const FIRE_FILE := "GunSingle/gun_single.ogg"
 

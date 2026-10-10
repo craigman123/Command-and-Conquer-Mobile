@@ -22,7 +22,8 @@ func _raycast(screen_pos: Vector2, mask: int = 0xFFFFFFFF) -> Dictionary:
 
 func _select_at(screen_pos: Vector2):
 	for u in selected:
-		u.set_selected(false)
+		if is_instance_valid(u):
+			u.set_selected(false)
 	selected.clear()
 	# world + vehicles, so a rock in front of a unit still blocks the click
 	var hit = _raycast(screen_pos, LAYER_WORLD | LAYER_VEHICLES)
@@ -31,9 +32,9 @@ func _select_at(screen_pos: Vector2):
 		hit.collider.set_selected(true)
 
 func _move_selected(screen_pos: Vector2):
+	selected = selected.filter(func(u): return is_instance_valid(u) and not u.dead)
 	# ground only, so clicking on a vehicle still gives a ground position
 	var hit = _raycast(screen_pos, LAYER_WORLD)
 	if hit:
 		for u in selected:
-			if is_instance_valid(u):
-				u.move_to(hit.position)
+			u.move_to(hit.position)
