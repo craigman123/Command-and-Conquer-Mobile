@@ -46,12 +46,17 @@ var _idle_tw: Tween
 @export var attack_range := 18.0
 @export var attack_damage := 8.0
 @export var fire_interval := 0.8
-@export var muzzle_height := 1.4      # how high the gun is above the vehicle's centre
-@export var muzzle_forward := 1.2     # how far in front of the centre the shots start
-@export var wreck_time := 30.0        # seconds the wreck stays before it's removed
-@export var burst_size := 5        # shots per burst
-@export var burst_delay := 0.3     # pause after each burst
+@export var muzzle_height := 1.4      		  # how high the gun is above the vehicle's centre
+@export var muzzle_forward := 1.2     		  # how far in front of the centre the shots start
+@export var wreck_time := 30.0       		  # seconds the wreck stays before it's removed
+@export var burst_size := 5        	  		  # shots per burst
+@export var burst_delay := 0.3     	  		  # pause after each burst
+@export var sink_time := 6.0      	  		  # seconds the wreck takes to sink
+@export var sink_depth := 3.5     	  		  # how far down it goes (a bit more than the vehicle's height)
+@export var ai_chase := true                  # enemy hunts player units on its own
+@export var chase_only_if_attacked := false   # true = stays put until it is shot at
 
+var provoked := false
 var burst_left := 0
 var dead := false
 var health := 0.0
@@ -266,7 +271,7 @@ func _update_combat(delta: float):
 		CombatVFX.tracer(self, muzzle, hit_pos)
 		combat_target.take_damage(attack_damage)
 
-	if is_in_group("enemy_units"):
+	if is_in_group("enemy_units") and ai_chase and (provoked or not chase_only_if_attacked):
 		if dist > attack_range * 0.8:
 			if path_index >= path.size():
 				move_to(combat_target.global_position)
@@ -512,21 +517,23 @@ func _update_tilt(delta: float):
 	var target_normal := Vector3.UP
 	if is_on_floor():
 		target_normal = get_floor_normal()
-	ground_normal = ground_normal.slerp(target_normal, clampf(tilt_speed * delta, 0.0, 1.0)).normalized()
-	var local_normal := (global_transform.basis.orthonormalized().inverse() * ground_normal).normalized()
-	var angle := Vector3.UP.angle_to(local_normal)
-	var max_angle := deg_to_rad(max_tilt_degrees)
-	if angle > max_angle:
-		var axis := Vector3.UP.cross(local_normal)
-		if axis.length() > 0.001:
-			local_normal = Vector3.UP.rotated(axis.normalized(), max_angle)
-		else:
-			local_normal = Vector3.UP
-	model.basis = Basis(Quaternion(Vector3.UP, local_normal)) * model_base_basis
-	if angle > max_angle:
-		local_normal = Vector3.UP.slerp(local_normal, max_angle / angle)
-	model.basis = Basis(Quaternion(Vector3.UP, local_normal)) * model_base_basis
+	ground_normal = ground_normal.lerp(target_normal, clampf(tilt_speed * delta, 0.0, 1.0)).normalized()
 
+	var local_normal := (global_transform.basis.orthonormalized().inverse() * ground_normal).normalized()
+
+	# clamp the tilt without any rotation maths
+	var max_angle := deg_to_rad(max_tilt_degrees)
+	var horiz := Vector2(local_normal.x, local_normal.z)
+	if Vector3.UP.angle_to(local_normal) > max_angle and horiz.length() > 0.001:
+		horiz = horiz.normalized()
+		local_normal = Vector3(horiz.x * sin(max_angle), cos(max_angle), horiz.y * sin(max_angle))
+
+	# build the tilt basis straight from the normal
+	var b := Basis()
+	b.y = local_normal
+	b.x = local_normal.cross(Vector3.BACK).normalized()
+	b.z = b.x.cross(b.y).normalized()
+	model.basis = b * model_base_basis
 
 func _update_smoke():
 	if smoke == null:
@@ -828,8 +835,15 @@ func _die():
 
 	set_physics_process(false)    # stops driving, shooting and gravity
 	await get_tree().create_timer(wreck_time).timeout
-	queue_free()
 
+	# no more collision, so units don't steer around or bump a sinking ghost
+	collision_layer = 0
+	collision_mask = 0
+
+	var tw := create_tween()
+	tw.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)   # starts slow, speeds up
+	tw.tween_property(self, "global_position:y", global_position.y - sink_depth, sink_time)
+	tw.tween_callback(queue_free)
 
 func _char_meshes(n: Node, mat: Material):
 	if n is MeshInstance3D:

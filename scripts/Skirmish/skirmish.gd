@@ -11,6 +11,8 @@ var episode_group := ButtonGroup.new()
 var selected_chapter := -1
 
 func _ready():
+	Engine.max_fps = 60
+	
 	$VBoxContainer/BackButton.pressed.connect(_on_back_pressed)
 	%PlayButton.pressed.connect(_on_play_pressed)
 	_load_data()

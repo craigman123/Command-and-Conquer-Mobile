@@ -13,6 +13,7 @@ config_version=5
 config/name="Command and Conquer Mobile"
 run/main_scene="uid://bae0ta3tu4vo6"
 config/features=PackedStringArray("4.7", "GL Compatibility")
+run/max_fps=45
 config/icon="uid://b4lpy8uu6ti2k"
 
 [autoload]
@@ -29,6 +30,7 @@ GameState="*uid://c0rxkpcivpy7i"
 
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
+window/vsync/vsync_mode=0
 
 [editor_plugins]
 

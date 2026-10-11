@@ -1,6 +1,8 @@
 extends Control
 
 func _ready():
+	Engine.max_fps = 60
+	
 	$VBoxContainer/PlayButton.pressed.connect(_on_play_pressed)
 	$VBoxContainer/GeneralsButton.pressed.connect(_on_generals_pressed)
 	$VBoxContainer/SettingsButton.pressed.connect(_on_settings_pressed)
