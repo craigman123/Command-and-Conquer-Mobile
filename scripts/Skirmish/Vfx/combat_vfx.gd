@@ -12,6 +12,9 @@ static var _light_tw: Tween
 static var _puff: GradientTexture2D
 static var _tracer_mesh: BoxMesh
 static var _burnt: StandardMaterial3D
+static var _crater_mesh: PlaneMesh
+static var _craters: Array = []
+const MAX_CRATERS := 20
 
 
 # ---------- settings for every effect ----------
@@ -64,6 +67,86 @@ static func _puff_texture() -> GradientTexture2D:
 		_puff.height = 64
 	return _puff
 
+static func _crater_texture() -> ImageTexture:
+	var size := 120
+	var img := Image.create(size, size, false, Image.FORMAT_RGBA8)
+	var noise := FastNoiseLite.new()
+	noise.noise_type = FastNoiseLite.TYPE_SIMPLEX_SMOOTH
+	noise.frequency = 1.4
+	noise.seed = 7
+	for y in size:
+		for x in size:
+			var p := Vector2(x, y) / float(size - 1) * 2.0 - Vector2.ONE
+			var r := p.length() + noise.get_noise_2d(p.x, p.y) * 0.16
+			var core := 1.0 - smoothstep(0.38, 0.5, r)
+			var rim := smoothstep(0.42, 0.52, r) * (1.0 - smoothstep(0.56, 0.68, r))
+			var scorch := (1.0 - smoothstep(0.5, 0.95, r)) * 0.5
+			var a := maxf(maxf(core * 0.95, rim * 0.8), scorch)
+			a *= 1.0 - smoothstep(0.85, 1.0, p.length())
+			var c := Color(0.12, 0.085, 0.055).lerp(Color(0.02, 0.015, 0.01), core)
+			c = c.lerp(Color(0.3, 0.22, 0.14), rim * (1.0 - core))
+			img.set_pixel(x, y, Color(c.r, c.g, c.b, a))
+	return ImageTexture.create_from_image(img)
+
+
+static func _get_crater_mesh() -> PlaneMesh:
+	if _crater_mesh == null:
+		var mat := StandardMaterial3D.new()
+		mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+		mat.albedo_texture = _crater_texture()
+		_crater_mesh = PlaneMesh.new()
+		_crater_mesh.size = Vector2(1, 1)
+		_crater_mesh.material = mat
+	return _crater_mesh
+
+
+static func crater(ctx: Node, pos: Vector3, size := 5.0, life := 8.0):
+	var parent := ctx.get_tree().current_scene
+	if parent == null:
+		return
+	_craters = _craters.filter(func(c): return is_instance_valid(c))
+
+	var q := PhysicsRayQueryParameters3D.create(pos + Vector3.UP * 3.0, pos + Vector3.DOWN * 8.0)
+	q.collision_mask = 1
+	if ctx is CollisionObject3D:
+		q.exclude = [(ctx as CollisionObject3D).get_rid()]
+	var hit := ctx.get_viewport().world_3d.direct_space_state.intersect_ray(q)
+	var point := pos
+	var normal := Vector3.UP
+	if not hit.is_empty():
+		point = hit.position
+		normal = hit.normal
+
+	var mi: MeshInstance3D
+	if _craters.size() >= MAX_CRATERS:
+		mi = _craters.pop_front()
+	else:
+		mi = MeshInstance3D.new()
+		mi.mesh = _get_crater_mesh()
+		mi.material_override = _get_crater_mesh().material.duplicate()
+		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		parent.add_child(mi)
+	_craters.append(mi)
+
+	var x := normal.cross(Vector3.BACK).normalized()
+	var z := x.cross(normal).normalized()
+	var b := Basis(x, normal, z).rotated(normal, randf() * TAU) * Basis.from_scale(Vector3(size, 1.0, size))
+	mi.global_transform = Transform3D(b, point + normal * 0.06)
+	
+	if mi.has_meta("tw"):
+		var old: Tween = mi.get_meta("tw")
+		if old and old.is_valid():
+			old.kill()
+	var mat := mi.material_override as StandardMaterial3D
+	mat.albedo_color = Color(1, 1, 1, 1)
+	mi.visible = true
+	var tw := mi.create_tween()
+	tw.tween_interval(maxf(life - 2.0, 0.1))
+	tw.tween_property(mat, "albedo_color:a", 0.0, 2.0)
+	tw.tween_callback(mi.hide)
+	mi.set_meta("tw", tw)
 
 # The expensive part (materials, curves, gradients). Runs once per effect, then is reused.
 static func _template(key: String) -> Dictionary:
@@ -207,12 +290,12 @@ static func impact(ctx: Node, pos: Vector3):
 	_play(ctx, "impact_dust", pos)
 
 
-static func explosion(ctx: Node, pos: Vector3):
+static func explosion(ctx: Node, pos: Vector3, crater_life := 8.0):
 	_play(ctx, "explosion_fire", pos)
 	_play(ctx, "explosion_smoke", pos + Vector3.UP * 0.5)
 	_play(ctx, "explosion_sparks", pos)
 	_flash(ctx, pos + Vector3.UP, Color(1, 0.6, 0.25), 12.0, 20.0, 0.4)
-
+	crater(ctx, pos, randf_range(3.5, 5.0), crater_life)
 
 # Continuous smoke from the wreck. It belongs to the vehicle, so it goes away with it.
 static func wreck_smoke(vehicle: Node3D, pos: Vector3):
@@ -259,10 +342,16 @@ static func warm_up(ctx: Node):
 	_root(ctx).add_child(dummy)
 	dummy.global_position = pos
 
+	var crater_dummy := MeshInstance3D.new()
+	crater_dummy.mesh = _get_crater_mesh()
+	_root(ctx).add_child(crater_dummy)
+	crater_dummy.global_position = pos
+
 	await ctx.get_tree().process_frame
 	await ctx.get_tree().process_frame
 
 	dummy.queue_free()
+	crater_dummy.queue_free()
 	for it in items:
 		var ps: GPUParticles3D = it[1]
 		ps.emitting = false

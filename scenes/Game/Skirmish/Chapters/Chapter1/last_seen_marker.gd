@@ -15,16 +15,17 @@ class_name LastSeenMarkers
 @export var unit_refresh_interval := 1.0          # how often to look for new/removed units
 
 @export var marker_text := "!"
-@export var group_radius := 30.0                  # enemies last seen within this distance share ONE marker
+@export var group_radius := 12.0                  # enemies last seen within this distance share ONE marker
 @export var marker_lifetime := 20.0               # seconds before a marker disappears
 @export var clear_radius := 8.0                   # an ally this close to a spot (not seeing the enemy) clears it
 @export var marker_height := 2.5
-@export var marker_color := Color(0.546, 0.0, 0.007, 1.0)
+@export var marker_color := Color(1.0, 0.25, 0.2)
 
 @export_group("Only used if no fog node is found")
 @export var vision_range := 35.0
 @export var require_line_of_sight := true
 
+@export_group("")
 @export var debug_print := false                  # prints what it found every 2 s (turn on if something is wrong)
 # -----------------------------------------------------------------------------
 

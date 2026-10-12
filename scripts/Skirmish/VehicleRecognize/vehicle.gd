@@ -4,6 +4,18 @@ extends CharacterBody3D
 @export_group("Driving")
 var driver: Node = null
 
+@export_group("Encircle")
+@export var encircle_spread := 70.0        # degrees to each side of the approach direction
+@export var encircle_radius_factor := 0.7  # ring radius as a fraction of attack_range
+@export var repath_interval := 1.0
+@export var repath_distance := 4.0         # re-path only if the goal moved this far
+
+var _enc_target: Node3D = null
+var _enc_bearing := 0.0
+var _repath_timer := 0.0
+var _last_goal := Vector3.INF
+var _slot := 0.0
+
 @export_group("Sound")
 @export var sound_enabled := true
 @export var sfx_dir := "res://assets/sounds/Units/"
@@ -12,15 +24,17 @@ var driver: Node = null
 @export var engine_off_file := "EngineOff/engine_off.ogg"
 @export var fire_file := "GunMachine/gun_machine.ogg"
 @export var explosion_file := "Explosion/explosion.ogg"
-@export var engine_volume_db := -6.0
-@export var gun_volume_db := 0.0
+@export var engine_volume_db := -10.0
+@export var gun_volume_db := 1.0
 @export var idle_pitch := 0.9          # engine pitch when standing still (1.0 = recording as is)
 @export var max_pitch := 1.6           # engine pitch at full speed
 @export var engine_off_delay := 6.0    # seconds standing still before the engine switches off
-@export var sound_unit_size := 20.0    # how far the sound carries at full volume
+@export var sound_unit_size := 8.0    # how far the sound carries at full volume
 @export var sound_max_distance := 150.0
 @export var engine_start_delay := 1.0
+@export var sound_hear_distance := 30.0   # camera farther than this from the vehicle: no sound at all
 
+var _sound_was_blocked := false
 enum EngineState { OFF, STARTING, RUNNING }
 var engine_state := EngineState.OFF
 var engine_timer := 0.0
@@ -41,6 +55,7 @@ var _idle_tw: Tween
 @export var forward_is_plus_z := true
 
 @export_group("Combat")
+@export var muzzle_marker: Node3D
 @export var faction := "heroes"
 @export var max_health := 100.0
 @export var attack_range := 18.0
@@ -48,7 +63,7 @@ var _idle_tw: Tween
 @export var fire_interval := 0.8
 @export var muzzle_height := 1.4      		  # how high the gun is above the vehicle's centre
 @export var muzzle_forward := 1.2     		  # how far in front of the centre the shots start
-@export var wreck_time := 30.0       		  # seconds the wreck stays before it's removed
+@export var wreck_time := 5.0       		  # seconds the wreck stays before it's removed
 @export var burst_size := 5        	  		  # shots per burst
 @export var burst_delay := 0.3     	  		  # pause after each burst
 @export var sink_time := 6.0      	  		  # seconds the wreck takes to sink
@@ -143,6 +158,7 @@ var ground_normal := Vector3.UP
 func _ready():
 	print(name, " faction=", faction, " player=", GameState.player_faction)
 	health = max_health
+	_slot = float(get_instance_id() % 1000) / 500.0 - 1.0
 	add_to_group("units")
 	add_to_group("vehicles")
 	add_to_group("player_units" if faction == GameState.player_faction else "enemy_units")
@@ -162,6 +178,9 @@ func _ready():
 		model = _find_model()
 	if model:
 		model_base_basis = model.basis
+		
+	if muzzle_marker == null:
+		muzzle_marker = find_child("Muzzle", true, false) as Node3D
 		
 	if sound_enabled:
 		_setup_sound()
@@ -254,6 +273,11 @@ func _update_combat(delta: float):
 
 	if not is_instance_valid(combat_target) or combat_target.dead:
 		burst_left = 0
+		# enemy AI: the target just died, so stop heading for its wreck and settle down
+		if combat_target != null and is_instance_valid(combat_target) and combat_target.dead \
+				and is_in_group("enemy_units") and ai_chase:
+			_stop_near()
+		combat_target = null
 		return
 
 	var dist := global_position.distance_to(combat_target.global_position)
@@ -261,22 +285,47 @@ func _update_combat(delta: float):
 	if dist <= attack_range and fire_cooldown <= 0.0:
 		if burst_left <= 0:
 			burst_left = burst_size
-			_play_gun()                      # sound once per burst
+		_play_gun()                      # sound once per bullet
 		burst_left -= 1
-		fire_cooldown += burst_delay if burst_left <= 0 else fire_interval
+		fire_cooldown += fire_interval if burst_left <= 0 else burst_delay
 
-		var muzzle := global_position + Vector3.UP * muzzle_height + _forward() * muzzle_forward
+		var muzzle := _muzzle_position()
+		print(name, " muzzle_marker=", muzzle_marker, " offset=", muzzle - global_position)
 		var hit_pos := combat_target.global_position + Vector3.UP * 1.0
 		CombatVFX.muzzle_flash(self, muzzle, (hit_pos - muzzle).normalized())
 		CombatVFX.tracer(self, muzzle, hit_pos)
 		combat_target.take_damage(attack_damage)
 
 	if is_in_group("enemy_units") and ai_chase and (provoked or not chase_only_if_attacked):
-		if dist > attack_range * 0.8:
-			if path_index >= path.size():
-				move_to(combat_target.global_position)
-		else:
+		# pick this vehicle's approach angle once per target
+		if combat_target != _enc_target:
+			_enc_target = combat_target
+			var away := global_position - combat_target.global_position
+			away.y = 0.0
+			if away.length() < 0.1:
+				away = -_forward()
+			_enc_bearing = atan2(away.x, away.z) + deg_to_rad(encircle_spread) * _slot
+			_last_goal = Vector3.INF
+
+		_repath_timer -= delta
+		if dist > attack_range * 0.95:
+			var goal := _encircle_goal()
+			if _repath_timer <= 0.0 and (path_index >= path.size() or goal.distance_to(_last_goal) > repath_distance):
+				_repath_timer = repath_interval
+				_last_goal = goal
+				move_to(goal)
+		elif dist < attack_range * 0.85:
 			_stop_near()
+			
+func _muzzle_position() -> Vector3:
+	if muzzle_marker != null:
+		return muzzle_marker.global_position
+	push_warning(name + ": muzzle_marker is null, using fallback")
+	return global_position + Vector3.UP * muzzle_height + _forward() * muzzle_forward
+
+func _encircle_goal() -> Vector3:
+	var r := attack_range * encircle_radius_factor
+	return combat_target.global_position + Vector3(sin(_enc_bearing), 0.0, cos(_enc_bearing)) * r
 
 func _find_enemy() -> Node3D:
 	var best: Node3D = null
@@ -827,7 +876,7 @@ func _die():
 		smoke.emitting = false
 
 	var pos := global_position + Vector3.UP * 0.8
-	CombatVFX.explosion(self, pos)
+	CombatVFX.explosion(self, pos, wreck_time + sink_time)
 	CombatVFX.wreck_smoke(self, pos)
 
 	# char every mesh with a dark see-through layer on top of its normal material
@@ -864,6 +913,7 @@ func _make_player(file: String, vol: float, polyphony := 1) -> AudioStreamPlayer
 	p.unit_size = sound_unit_size
 	p.max_distance = sound_max_distance
 	p.max_polyphony = polyphony    # how many copies of this sound may overlap
+	p.attenuation_model = AudioStreamPlayer3D.ATTENUATION_INVERSE_SQUARE_DISTANCE
 	add_child(p)
 	return p
 
@@ -872,11 +922,10 @@ func _setup_sound():
 	snd_start = _make_player(engine_start_file, engine_volume_db)
 	snd_idle = _make_player(engine_idle_file, engine_volume_db)
 	snd_off = _make_player(engine_off_file, engine_volume_db)
-	snd_gun = _make_player(fire_file, gun_volume_db, 3)
+	snd_gun = _make_player(fire_file, gun_volume_db, 8)
 	# the idle must repeat forever
 	if snd_idle and snd_idle.stream is AudioStreamOggVorbis:
 		(snd_idle.stream as AudioStreamOggVorbis).loop = true
-	print(name, " sound: start=", snd_start, " idle=", snd_idle, " gun=", snd_gun)
 
 
 func _update_engine(delta: float):
@@ -906,6 +955,8 @@ func _update_engine(delta: float):
 				idle_time += delta
 				if idle_time >= engine_off_delay:
 					_engine_stop()
+					
+	_apply_sound_distance()
 
 func _engine_start():
 	engine_state = EngineState.STARTING
@@ -953,6 +1004,9 @@ func _stop_all_sound():
 			p.stop()
 
 func _play_explosion_sound():
+	if _sound_blocked():
+		return
+	
 	var path := sfx_dir + explosion_file
 	if not ResourceLoader.exists(path):
 		return
@@ -964,3 +1018,21 @@ func _play_explosion_sound():
 	add_child(p)
 	p.play()
 	p.finished.connect(p.queue_free)
+	
+# no sound when the camera is far away, or when the vehicle is hidden (e.g. an enemy in the fog)
+func _sound_blocked() -> bool:
+	if not is_visible_in_tree():
+		return true
+	var cam := get_viewport().get_camera_3d()
+	return cam != null and cam.global_position.distance_to(global_position) > sound_hear_distance
+
+
+func _apply_sound_distance() -> void:
+	var blocked := _sound_blocked()
+	if blocked:
+		for p in [snd_start, snd_idle, snd_off, snd_gun]:
+			if p and p.playing:
+				p.stop()
+	elif _sound_was_blocked and engine_state == EngineState.RUNNING:
+		_idle_fade(engine_volume_db, 0.4)     # back in range: bring the engine loop back
+	_sound_was_blocked = blocked

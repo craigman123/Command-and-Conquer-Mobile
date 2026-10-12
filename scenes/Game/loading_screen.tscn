@@ -32,6 +32,7 @@ var layer: CanvasLayer
 
 func _ready():
 	Engine.max_fps = 60
+	add_to_group(\"loading_screen\")
 	
 	bar.min_value = 0
 	bar.max_value = 100

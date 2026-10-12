@@ -3,7 +3,9 @@ class_name WheeledDriving
 
 @export var reverse_speed := 8.0
 @export var turn_radius := 6.0
-@export var short_reverse_distance := 8.0   # destination this close behind us: back up to it, but only if the way back is clear
+@export var short_reverse_distance := 30.0  # destination BEHIND us closer than this: back up to it, but only if the way back is clear
+@export var rear_check_distance := 10.0     # we need this much clear ground behind us to start reversing (checked again as we go)
+@export var reverse_commit_time := 1.0      # first seconds of a reverse: only a destination clearly IN FRONT cancels it
 @export var min_turn_speed := 3.0           # can still steer while almost stopped (otherwise it can't turn from a standstill)
 @export var corner_speed_factor := 0.55     # speed multiplier at a 90 degree corner (1.0 = never slow for corners)
 @export var arrive_decel := 0.6             # share of brake_force used to plan the stop (lower = starts braking earlier)
@@ -20,6 +22,13 @@ class_name WheeledDriving
 @export var orbit_limit_degrees := 400.0    # turned this much without getting closer = circling the destination
 @export var orbit_progress := 1.5           # metres closer that count as "making progress"
 @export var orbit_give_up_dist := 8.0       # circling this close to the destination twice: call it arrived
+
+# ---------- RETREAT ("back down") ----------
+@export var retreat_distance := 30.0        # how far to back away from the enemy (metres)
+@export var retreat_reverse_max := 25.0     # reverse for at most this far; the rest of the retreat is driven forward (reverse is slow and blind)
+@export var retreat_safe_distance := 60.0   # stop early once this far from the enemy
+@export var retreat_timeout := 15.0       # give up the retreat after this many seconds (e.g. if it is stuck)
+@export var retreat_blocked_dist := 1.5     # something this close behind us: stop reversing and turn around instead
 
 enum Mode { NORMAL, REVERSE, UTURN, THREE_POINT }
 
@@ -38,6 +47,15 @@ var _best_dist := INF       # orbit detection
 var _orbit_yaw := 0.0
 var _orbit_strikes := 0
 var _crawl_time := 0.0      # while > 0 the vehicle crawls so its turning circle shrinks
+
+var _new_order := false      # a new order arrived: re-pick the turn side once, but keep the current manoeuvre
+var _retreating := false
+var _retreat_reversing := true
+var _retreat_start := Vector3.ZERO
+var _retreat_dist := 30.0
+var _retreat_time := 0.0
+var _threat_node: Node3D = null
+var _threat_pos := Vector3.ZERO
 
 # cached sensor readings (see _sense)
 var _clock := 0.0
@@ -59,9 +77,50 @@ func setup(vehicle: VehicleBase):
 
 
 func on_new_order():
-	_end_maneuver()
+	_retreating = false
 	_cooldown = 0.0
 	_reset_orbit()
+	_new_order = true
+	# NOTE: the current manoeuvre (reverse / U-turn / three-point turn) is NOT reset. If the player
+	# clicks again and again, the unit must carry on, not restart from the forward leg every click.
+	# The manoeuvre code below checks the newest destination every frame and ends itself when it no
+	# longer makes sense.
+
+
+# Call this when the player tells the unit to back down.
+# threat = the enemy (a Node3D, followed while it lives) or a Vector3 position.
+# The unit keeps its FRONT toward the threat and reverses away, then turns and drives
+# forward if reversing is blocked or the retreat is longer than retreat_reverse_max.
+# Call it AFTER the move order is cleared; any new order cancels the retreat.
+func start_retreat(threat, distance: float = -1.0) -> void:
+	if v == null:
+		return
+	_end_maneuver()
+	_reset_orbit()
+	v._stop_near()                          # drop the old move order (clears the path)
+	_threat_node = null
+	if threat is Node3D:
+		_threat_node = threat
+		_threat_pos = threat.global_position
+	elif threat is Vector3:
+		_threat_pos = threat
+	else:
+		return
+	_retreat_dist = distance if distance > 0.0 else retreat_distance
+	_retreat_start = v.global_position
+	_retreat_time = 0.0
+	_ensure_sensed(0.0)
+	_retreat_reversing = _rear >= bumper_room
+	_retreating = true
+
+
+func stop_retreat() -> void:
+	_retreating = false
+	_threat_node = null
+
+
+func is_retreating() -> bool:
+	return _retreating
 
 
 func _end_maneuver():
@@ -103,6 +162,10 @@ func drive(delta: float):
 	_crawl_time = maxf(_crawl_time - delta, 0.0)
 	if mode != Mode.NORMAL:
 		_man_time += delta
+
+	if _retreating:
+		_drive_retreat(delta)
+		return
 
 	if v.has_target:
 		var angle := v._forward().signed_angle_to(v.target_dir, Vector3.UP)
@@ -204,10 +267,78 @@ func drive(delta: float):
 	_check_orbit(yaw_change)
 
 
+func _threat_position() -> Vector3:
+	if _threat_node != null and is_instance_valid(_threat_node):
+		_threat_pos = _threat_node.global_position
+	return _threat_pos
+
+
+func _flat_dist(a: Vector3, b: Vector3) -> float:
+	return Vector2(a.x - b.x, a.z - b.z).length()
+
+
+func _drive_retreat(delta: float) -> void:
+	var pos := v.global_position
+	var threat := _threat_position()
+	var away := pos - threat
+	away.y = 0.0
+	if away.length() < 0.5:
+		away = -v._forward()            # right on top of it: just back straight up
+	away = away.normalized()
+
+	_retreat_time += delta
+	var travelled := _flat_dist(pos, _retreat_start)
+	if travelled >= _retreat_dist or _flat_dist(pos, threat) >= retreat_safe_distance or _retreat_time >= retreat_timeout:
+		stop_retreat()
+		v.reversing = false
+		v._accelerate(0.0, delta)
+		return
+
+	_ensure_sensed(sense_interval * 0.5)
+	# stop reversing if something is behind us, or we've reversed as far as is sensible
+	if _retreat_reversing and (_rear < retreat_blocked_dist or travelled >= retreat_reverse_max):
+		_retreat_reversing = false
+
+	var angle := v._forward().signed_angle_to(away, Vector3.UP)   # where "away" is, relative to our nose
+	var steer_angle := 0.0
+	var target_speed := 0.0
+
+	if _retreat_reversing:
+		# rear points away from the enemy, so the nose stays on it
+		v.reversing = true
+		steer_angle = wrapf(angle - PI, -PI, PI)
+		var room := clampf((_rear - retreat_blocked_dist) / (bumper_room * 2.0), 0.25, 1.0)
+		target_speed = -reverse_speed * room
+	else:
+		# turn round and drive away forward
+		v.reversing = false
+		steer_angle = angle
+		target_speed = v.speed * _turn_speed_factor(absf(angle))
+		var avoid = v._avoid_obstacles()
+		steer_angle = clampf(steer_angle * (1.0 - avoid[2]) + avoid[0], -PI, PI)
+		target_speed *= avoid[1]
+		if v._update_stuck(delta, target_speed):
+			v.reversing = true
+			target_speed = -reverse_speed
+			steer_angle = -steer_angle
+
+	v._accelerate(target_speed, delta)
+	var max_step := maxf(absf(v.current_speed), min_turn_speed) / turn_radius * delta
+	v.rotation.y += clampf(steer_angle, -max_step, max_step)
+	last_yaw = v.rotation.y
+
+
 # Decides HOW to face a destination that is behind us. Runs once per manoeuvre
 # (plus cheap cached checks while it is running), so it doesn't spam raycasts.
 func _plan_maneuver(angle: float):
 	var angle_abs := absf(angle)
+
+	# new order while turning round: re-pick the shorter side for the NEW destination (once)
+	if _new_order and (mode == Mode.UTURN or mode == Mode.THREE_POINT):
+		_ensure_sensed(sense_interval)
+		turn_side = _pick_side(angle)
+	_new_order = false
+
 	match mode:
 		Mode.NORMAL:
 			if angle_abs <= deg_to_rad(100.0) or _cooldown > 0.0:
@@ -224,8 +355,11 @@ func _plan_maneuver(angle: float):
 
 		Mode.REVERSE:
 			_ensure_sensed(sense_interval)
-			if angle_abs < deg_to_rad(80.0):
+			var exit_deg := 60.0 if _man_time < reverse_commit_time else 80.0
+			if angle_abs < deg_to_rad(exit_deg):
 				_end_maneuver()
+			elif v.target_dist > short_reverse_distance * 1.5:
+				_end_maneuver()                 # too far to back up all the way: turn round and drive
 			elif _rear < 1.5 or _beside_l < side_margin * 0.6 or _beside_r < side_margin * 0.6:
 				# something appeared behind / right beside us: don't back into it, turn instead
 				turn_side = _pick_side(angle)
@@ -263,7 +397,8 @@ func _pick_side(angle: float) -> float:
 # Backing up is only worth it when nothing is behind us AND nothing is standing
 # beside us where the nose or tail would swing into it.
 func _reverse_is_safe(dist: float) -> bool:
-	return _rear > dist + 1.0 and _rear >= bumper_room \
+	var need := minf(dist, rear_check_distance) + 1.0
+	return _rear > need and _rear >= bumper_room \
 		and _beside_l >= side_margin and _beside_r >= side_margin
 
 
@@ -301,7 +436,7 @@ func _check_orbit(yaw_change: float):
 	if _orbit_strikes == 1:
 		_crawl_time = 4.0
 	elif v.target_dist < orbit_give_up_dist:
-		v.has_target = false     # close enough. NOTE: check this matches how VehicleBase marks arrival
+		v._stop_near()           # close enough: clears the path, which is what really ends the order
 		_end_maneuver()
 		_reset_orbit()
 	else:

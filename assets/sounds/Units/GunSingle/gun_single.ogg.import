@@ -1,19 +1,24 @@
 [remap]
 
-importer="oggvorbisstr"
-type="AudioStreamOggVorbis"
-uid="uid://dvvcwndj4s7hc"
-path="res://.godot/imported/gun_single.ogg-81da66ef546fc54061c78754bf4df057.oggvorbisstr"
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://5uss6orxjbe2"
+path="res://.godot/imported/gun_single.ogg-81da66ef546fc54061c78754bf4df057.sample"
 
 [deps]
 
 source_file="res://assets/sounds/Units/GunSingle/gun_single.ogg"
-dest_files=["res://.godot/imported/gun_single.ogg-81da66ef546fc54061c78754bf4df057.oggvorbisstr"]
+dest_files=["res://.godot/imported/gun_single.ogg-81da66ef546fc54061c78754bf4df057.sample"]
 
 [params]
 
-loop=false
-loop_offset=0
-bpm=0
-beat_count=0
-bar_beats=4
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2

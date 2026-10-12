@@ -4,7 +4,7 @@ extends Node3D
 @export var rotate_speed := 0.005
 @export var zoom_step := 4.0
 @export var min_zoom := 20.0
-@export var max_zoom := 70.0
+@export var max_zoom := 100.0
 @export var min_pitch := 40.0
 @export var max_pitch := 80.0
 @export var map_limit := 215.0
@@ -22,6 +22,7 @@ extends Node3D
 @export var fade_in_time := 1.5
 @export var fade_hold := 0.3  # seconds of full black before fading starts
 @export var fade_color := Color.BLACK
+@export var fade_wait_timeout := 30.0
 
 # The camera is never allowed to rise above this world height (Y).
 @export var max_camera_height := 90.0
@@ -30,6 +31,10 @@ extends Node3D
 # Drag a node here whose children are Marker3D points outlining the area
 # the camera may roam in. If left empty, the old square (map_limit) is used.
 @export var camera_bounds: Node3D
+
+var _fade_layer: CanvasLayer
+var _fade_rect: ColorRect
+var _fade_started := false
 
 @onready var cam: Camera3D = $Camera3D
 
@@ -48,6 +53,36 @@ func _ready():
 	_build_bounds()
 	if fade_in_enabled:
 		_fade_in()
+		
+func _make_fade_cover() -> void:
+	_fade_layer = CanvasLayer.new()
+	_fade_layer.layer = 100
+	add_child(_fade_layer)
+	_fade_rect = ColorRect.new()
+	_fade_rect.color = fade_color
+	_fade_rect.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_fade_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_fade_layer.add_child(_fade_rect)
+	var waited := 0.0
+	while waited < fade_wait_timeout and _loading_screen_active():
+		await get_tree().process_frame
+		waited += get_process_delta_time()
+	start_fade_in()
+	
+func start_fade_in() -> void:
+	if _fade_started or _fade_rect == null:
+		return
+	_fade_started = true
+	if fade_hold > 0.0:
+		await get_tree().create_timer(fade_hold).timeout
+	var tween := create_tween()
+	tween.tween_property(_fade_rect, "color:a", 0.0, fade_in_time)
+	await tween.finished
+	_fade_layer.queue_free()
+
+func _loading_screen_active() -> bool:
+	var ls := get_tree().get_first_node_in_group("loading_screen")
+	return ls != null and ls.get("visible") != false
 		
 func _fade_in() -> void:
 	var layer := CanvasLayer.new()
