@@ -10,6 +10,8 @@ var dragging := false
 var drag_start := Vector2.ZERO
 var box: Panel
 
+var current_target: Node = null
+
 func _ready():
 	var layer := CanvasLayer.new()
 	add_child(layer)
@@ -37,7 +39,7 @@ func _unhandled_input(event):
 				else:
 					_select_in_rect(Rect2(drag_start, Vector2.ZERO).expand(event.position))
 		elif event.button_index == MOUSE_BUTTON_RIGHT and event.pressed:
-			_move_selected(event.position)
+			_command_at(event.position)
 
 	elif event is InputEventMouseMotion and dragging:
 		if event.position.distance_to(drag_start) >= DRAG_THRESHOLD:
@@ -77,23 +79,65 @@ func _select_at(screen_pos: Vector2):
 	selected.clear()
 	# world + vehicles, so a rock in front of a unit still blocks the click
 	var hit = _raycast(screen_pos, LAYER_WORLD | LAYER_VEHICLES)
+	if hit:
+		print("CLICK hit: ", hit.collider.name, " in player_units=", hit.collider.is_in_group("player_units"), " groups=", hit.collider.get_groups())
+	else:
+		print("CLICK hit nothing")
 	if hit and hit.collider.is_in_group("player_units"):
 		selected.append(hit.collider)
 		hit.collider.set_selected(true)
 
-func _move_selected(screen_pos: Vector2):
+func _command_at(screen_pos: Vector2):
+	# drop dead/freed units from the selection
+	print("RIGHT CLICK, selected=", selected.size())
 	for i in range(selected.size() - 1, -1, -1):
 		if not is_instance_valid(selected[i]) or selected[i].dead:
 			selected.remove_at(i)
+	if selected.is_empty():
+		return
 
+	# did we right-click an enemy? (world + vehicles so rocks still block)
+	var hit = _raycast(screen_pos, LAYER_WORLD | LAYER_VEHICLES)
+	if hit and hit.collider.is_in_group("enemy_units") and not hit.collider.dead:
+		_attack_target(hit.collider)
+	else:
+		_move_selected(screen_pos)
+
+func _attack_target(enemy: Node):
+	_clear_target()
+	current_target = enemy
+	enemy.set_attack_target(true)
+	for u in selected:
+		if u.has_method("attack_target"):
+			u.attack_target(enemy)   # rename to whatever your units use
+		else:
+			u.move_to(enemy.global_position)  # fallback: just walk toward it
+
+func _clear_target():
+	if is_instance_valid(current_target):
+		current_target.set_attack_target(false)
+	current_target = null
+
+func _move_selected(screen_pos: Vector2):
+	print("MOVE order, selected=", selected.size())
 	var hit = _raycast(screen_pos, LAYER_WORLD)
-	if hit:
-		var n := selected.size()
-		var cols := ceili(sqrt(n))
-		var rows := ceili(n / float(cols))
-		var spacing := 4.0
-		for i in n:
-			var col := i % cols
-			var row := floori(i / float(cols))
-			var off := Vector3(col - (cols - 1) * 0.5, 0.0, row - (rows - 1) * 0.5) * spacing
-			selected[i].move_to(hit.position + off)
+	print("ground hit=", hit)
+	if not hit:
+		return
+	_clear_target()
+
+	# green marker at the clicked point
+	var marker := DestinationMarker.new()
+	get_tree().current_scene.add_child(marker)
+	marker.global_position = hit.position + Vector3(0, 0.05, 0)
+
+	var n := selected.size()
+	var cols := ceili(sqrt(n))
+	var rows := ceili(n / float(cols))
+	var spacing := 4.0
+	for i in n:
+		var col := i % cols
+		var row := floori(i / float(cols))
+		var off := Vector3(col - (cols - 1) * 0.5, 0.0, row - (rows - 1) * 0.5) * spacing
+		selected[i].forced_target = null
+		selected[i].move_to(hit.position + off)

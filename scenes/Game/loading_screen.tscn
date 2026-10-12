@@ -45,7 +45,7 @@ func _ready():
 	target = SceneLoader.next_scene
 	if target == \"\":
 		push_warning(\"No scene to load\")
-		get_tree().change_scene_to_file(\"res://scenes/StartingMenu/selection_menu.tscn\")
+		get_tree().change_scene_to_file(\"res://scenes/FallBackScene/404.tscn\")
 		return
 
 	map_name = target.get_file().get_basename().capitalize()

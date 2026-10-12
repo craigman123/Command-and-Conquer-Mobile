@@ -1,0 +1,75 @@
+[gd_scene format=3 uid="uid://dgqg8xo8fcijp"]
+
+[ext_resource type="PackedScene" uid="uid://do1dpcluo54dt" path="res://assets/models/Units/Tanks/T72/t_72.tscn" id="1_jnm0j"]
+[ext_resource type="Script" uid="uid://dg11n68pcm0ha" path="res://scenes/Testings/test_map.gd" id="1_tkngx"]
+[ext_resource type="PackedScene" uid="uid://cp6u7lkne8bb8" path="res://assets/models/Units/Vehicles/TechnicalPickup/TechnicalPickup.tscn" id="2_55wmy"]
+[ext_resource type="Script" uid="uid://dhrf5u3s2j63e" path="res://scripts/ControlUnit/rts_controller.gd" id="3_hf43o"]
+[ext_resource type="PackedScene" uid="uid://cytxka1e07ta8" path="res://scenes/Game/Camera/camera_rig.tscn" id="4_678ql"]
+[ext_resource type="Script" uid="uid://cfb5ob6xsd518" path="res://scenes/Game/Skirmish/Chapters/Chapter1/directional_light_3d.gd" id="5_678ql"]
+
+[sub_resource type="NavigationMesh" id="NavigationMesh_4kxuq"]
+vertices = PackedVector3Array(1.609375, 0.4037323, 1.9628677, 1.359375, 0.4037323, 6.7128677, 19.609375, 0.4037323, 6.7128677, -19.640625, 0.4037323, 6.7128677, -0.890625, 0.4037323, 6.7128677, -1.390625, 0.4037323, 2.9628677, 1.109375, 0.4037323, 1.4628677, 19.609375, 0.4037323, -32.787132, -0.890625, 0.4037323, 1.4628677, -19.640625, 0.4037323, -32.787132, -0.140625, 1.4037323, 2.4628677, -0.140625, 1.4037323, 3.4628677, 0.359375, 1.4037323, 3.4628677, 0.359375, 1.4037323, 2.4628677)
+polygons = [PackedInt32Array(2, 1, 0), PackedInt32Array(5, 4, 3), PackedInt32Array(0, 6, 2), PackedInt32Array(2, 6, 7), PackedInt32Array(5, 3, 8), PackedInt32Array(8, 3, 9), PackedInt32Array(6, 8, 7), PackedInt32Array(7, 8, 9), PackedInt32Array(13, 12, 10), PackedInt32Array(10, 12, 11)]
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_4kxuq"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_jnm0j"]
+size = Vector3(40.141724, 1, 40.477814)
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_tkngx"]
+
+[sub_resource type="Sky" id="Sky_8hpsx"]
+sky_material = SubResource("ProceduralSkyMaterial_tkngx")
+
+[sub_resource type="Environment" id="Environment_857up"]
+background_mode = 2
+sky = SubResource("Sky_8hpsx")
+fog_light_color = Color(0, 0, 0, 1)
+fog_light_energy = 0.95
+fog_density = 0.007
+fog_height = 0.4
+
+[node name="test_map" type="Node3D" unique_id=1192240080]
+script = ExtResource("1_tkngx")
+
+[node name="NavigationRegion3D" type="NavigationRegion3D" parent="." unique_id=1716403655]
+navigation_mesh = SubResource("NavigationMesh_4kxuq")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="NavigationRegion3D" unique_id=1062417255]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/StaticBody3D" unique_id=1003175992]
+transform = Transform3D(20, 0, 0, 0, 20, 0, 0, 0, 20, 0, -0.4110117, -12.9366255)
+mesh = SubResource("PlaneMesh_4kxuq")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/StaticBody3D" unique_id=464107058]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.06976318, -0.6854267, -13.0482235)
+shape = SubResource("BoxShape3D_jnm0j")
+
+[node name="TechnicalPickup" parent="NavigationRegion3D" unique_id=27427195 instance=ExtResource("2_55wmy")]
+transform = Transform3D(-0.9998882, 0, -0.014955953, 0, 1, 0, 0.014955953, 0, -0.9998882, 0.14172935, 0, 4.060912)
+max_health = 1000.0
+attack_damage = 0.01
+armor = 0.001
+
+[node name="T72" parent="NavigationRegion3D" unique_id=507133026 instance=ExtResource("1_jnm0j")]
+transform = Transform3D(-0.99990344, 0, 0.013895391, 0, 1, 0, -0.013895391, 0, -0.99990344, 0.020799637, 0, -29.325556)
+collision_layer = 2
+
+[node name="Controller" type="Node" parent="." unique_id=1210204478]
+script = ExtResource("3_hf43o")
+
+[node name="CameraRig" parent="." unique_id=1703168091 instance=ExtResource("4_678ql")]
+transform = Transform3D(-0.73336095, 0.07700408, 0.6754642, -0.0053269463, 0.992883, -0.118973985, -0.67981833, -0.090849, -0.7277316, 5.061302, 66.28207, -22.27312)
+min_zoom = 10.0
+map_limit = 220.0
+fade_in_enabled = false
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=2088136434]
+environment = SubResource("Environment_857up")
+
+[node name="ShadingGraphics" type="Node3D" parent="." unique_id=1199067462]
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="ShadingGraphics" unique_id=46568728]
+transform = Transform3D(0.0618228, 0.59377176, -0.80225503, -0.01949948, 0.8043577, 0.59382534, 0.9978967, -0.02106839, 0.061305888, 0.44831753, 99.72827, 0)
+shadow_enabled = true
+script = ExtResource("5_678ql")

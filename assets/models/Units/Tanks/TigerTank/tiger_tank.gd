@@ -10,11 +10,14 @@ extends VehicleBase
 
 # ---------- TANK SETTINGS ----------
 const TANK_FACTION := "heroes"        # change to "villains" if this tank is on the enemy side
-const TANK_HEALTH := 300.0
+const TANK_HEALTH := 200.0
 const TANK_DAMAGE := 25.0
 const TANK_RANGE := 25.0
 const TANK_FIRE_INTERVAL := 2.0
 const TANK_SPEED := 5.0
+const TANK_ARMOR := 0.8
+# const BURST_DELAY = 0.0 - not used for tanks
+const TANK_BURST_SIZE := 1
 
 const TANK_SMOKE_OFFSET := Vector3(0.0, 0.7, 2.3)   # exhaust at the rear (+Z for this model)
 const TANK_DUST_OFFSET := Vector3(0.0, 0.3, 2.5)
@@ -26,20 +29,23 @@ const MUZZLE_HEIGHT := 1.4
 const MUZZLE_FORWARD := 1.2
 
 const IDLE_PITCH := 6.0
-const GUN_VOLUME_DB := 3.0
+const GUN_VOLUME_DB := 2.0
 const MAX_PITCH := 1.0
 
 const FIRE_FILE := "GunSingle/gunshot_short.wav"
 
 func _init():
 	forward_is_plus_z = false                  # the tank model faces -Z
-
+	
+	burst_size = TANK_BURST_SIZE
 	faction = TANK_FACTION
 	max_health = TANK_HEALTH
 	attack_damage = TANK_DAMAGE
 	attack_range = TANK_RANGE
 	fire_interval = TANK_FIRE_INTERVAL
 	speed = TANK_SPEED
+	armor = TANK_ARMOR
+	# burst_delay = BURST_DELAY
 
 	smoke_offset = TANK_SMOKE_OFFSET
 	smoke_max_amount = TANK_SMOKE_AMOUNT

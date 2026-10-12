@@ -12,10 +12,12 @@ class_name Technical
 # ---------- TECHNICAL SETTINGS ----------
 const TRUCK_FACTION := "villains"
 const TRUCK_HEALTH := 80.0
-const TRUCK_DAMAGE := 1.0
+const TRUCK_DAMAGE := 2.0
 const TRUCK_RANGE := 16.0
-const TRUCK_FIRE_INTERVAL := 0.01
+const TRUCK_FIRE_INTERVAL := 0.05
 const TRUCK_SPEED := 9.0
+const BURST_DELAY = 0.5
+const ARMOR = 1.0
 
 const TRUCK_SMOKE_OFFSET := Vector3(0.0, 0.7, 2.3)
 const TRUCK_DUST_OFFSET := Vector3(0.0, 0.3, 2.5)
@@ -41,6 +43,8 @@ func _init():
 	attack_range = TRUCK_RANGE
 	fire_interval = TRUCK_FIRE_INTERVAL
 	speed = TRUCK_SPEED
+	burst_delay = BURST_DELAY
+	armor = ARMOR
 
 	smoke_offset = TRUCK_SMOKE_OFFSET
 	smoke_max_amount = TRUCK_SMOKE_AMOUNT

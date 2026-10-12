@@ -52,11 +52,11 @@ func _ready():
 	_update_camera()
 	_build_bounds()
 	if fade_in_enabled:
-		_fade_in()
+		_make_fade_cover()
 		
 func _make_fade_cover() -> void:
 	_fade_layer = CanvasLayer.new()
-	_fade_layer.layer = 100
+	_fade_layer.layer = 99
 	add_child(_fade_layer)
 	_fade_rect = ColorRect.new()
 	_fade_rect.color = fade_color
@@ -73,11 +73,17 @@ func start_fade_in() -> void:
 	if _fade_started or _fade_rect == null:
 		return
 	_fade_started = true
+	print("fade start, loading screen still active: ", _loading_screen_active())
+	for i in 3:
+		await get_tree().process_frame
+	_fade_rect.color.a = 1.0
 	if fade_hold > 0.0:
 		await get_tree().create_timer(fade_hold).timeout
-	var tween := create_tween()
-	tween.tween_property(_fade_rect, "color:a", 0.0, fade_in_time)
-	await tween.finished
+	var t := 0.0
+	while t < fade_in_time:
+		await get_tree().process_frame
+		t += minf(get_process_delta_time(), 0.033)
+		_fade_rect.color.a = 1.0 - t / fade_in_time
 	_fade_layer.queue_free()
 
 func _loading_screen_active() -> bool:

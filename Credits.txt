@@ -1,0 +1,7 @@
+[Important] This file contains the models, packs, etc. authors that has license attributions, we cannot use models
+other authors that has cc attributions if we dont credit them.
+
+"Low Poly T-72 Tank by Mr. The Rich (Sketchfab)"
+
+
+"LIST ALL MODELS WITH CC ATTRIBUTES HERE SO WE CAN INCLUDE THEM INTO THE GAME CREDITS"

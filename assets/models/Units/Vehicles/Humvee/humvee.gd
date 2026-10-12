@@ -13,8 +13,10 @@ const HUMVEE_FACTION := "heroes"
 const HUMVEE_HEALTH := 120.0
 const HUMVEE_DAMAGE := 2.0
 const HUMVEE_RANGE := 18.0
-const HUMVEE_FIRE_INTERVAL := 0.1
+const HUMVEE_FIRE_INTERVAL := 0.01
 const HUMVEE_SPEED := 10.0
+const BURST_DELAY = 0.3
+const ARMOR := 0.9
 
 # smoke and dust spawn points: (left/right, up/down, front/back)
 const HUMVEE_SMOKE_OFFSET := Vector3(0.0, 0.7, -1.3)
@@ -45,6 +47,8 @@ func _init():
 	speed = HUMVEE_SPEED
 	burst_size = BURST_SIZE
 	fire_interval = FIRE_INTERVAL
+	burst_delay = BURST_DELAY
+	armor = ARMOR
 
 	smoke_offset = HUMVEE_SMOKE_OFFSET
 	smoke_max_amount = HUMVEE_SMOKE_AMOUNT

@@ -35,10 +35,17 @@ func _physics_process(delta: float) -> void:
 		var dir := t.global_position - global_position
 		dir.y = 0.0
 		if dir.length() > 0.1:
-			var desired := atan2(-dir.x, -dir.z) + model_forward_offset
-			global_rotation.y = lerp_angle(global_rotation.y, desired, turn_speed * delta)
+			var parent := get_parent() as Node3D
+			# turn the world direction into the parent's local space, so tilt and base rotation don't matter
+			var local_dir := parent.global_transform.basis.orthonormalized().inverse() * dir
+			var desired := atan2(-local_dir.x, -local_dir.z) + model_forward_offset
+			var diff := angle_difference(rotation.y, desired)   # always the shortest way round
+			var step := turn_speed * delta
+			rotation.y += clampf(diff, -step, step)
 	elif return_to_rest:
-		rotation.y = lerp_angle(rotation.y, _rest_yaw, turn_speed * delta)
+		var diff := angle_difference(rotation.y, _rest_yaw)
+		var step := turn_speed * delta
+		rotation.y += clampf(diff, -step, step)
 
 func _find_far_enemy() -> Node3D:
 	var best: Node3D = null

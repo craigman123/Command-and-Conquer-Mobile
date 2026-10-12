@@ -1,0 +1,59 @@
+[gd_scene format=3 uid="uid://c5pso3j85b4qu"]
+
+[ext_resource type="Script" uid="uid://cwxuc08pmlhbx" path="res://scenes/FallBackScene/404.gd" id="1_m8vrb"]
+[ext_resource type="Texture2D" uid="uid://ctlpy388wv0jn" path="res://assets/sprites/SkirmishChapterImages/FallbackImages/falback_image_scene.jpg" id="1_upl5o"]
+
+[node name="404" type="Control" unique_id=1497923361]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -1152.0
+offset_bottom = -648.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_m8vrb")
+
+[node name="TextureRect2" type="TextureRect" parent="." unique_id=214136656]
+layout_mode = 0
+offset_right = 1157.0
+offset_bottom = 646.0
+
+[node name="ColorRect" type="ColorRect" parent="TextureRect2" unique_id=914241607]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 1)
+
+[node name="TextureRect" type="TextureRect" parent="." unique_id=60510165]
+custom_maximum_size = Vector2(300, 200)
+layout_mode = 1
+offset_left = 413.0
+offset_top = 151.0
+offset_right = 713.0
+offset_bottom = 351.0
+texture = ExtResource("1_upl5o")
+
+[node name="Label" type="Label" parent="." unique_id=2093859818]
+layout_mode = 0
+offset_left = 424.0
+offset_top = 363.0
+offset_right = 714.0
+offset_bottom = 415.0
+theme_override_colors/font_color = Color(0.48178947, 0.48178947, 0.48178947, 1)
+theme_override_font_sizes/font_size = 25
+text = "404 FORBIDDEN"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ExitButton" type="Button" parent="." unique_id=2106626784]
+layout_mode = 0
+offset_left = 22.0
+offset_top = 590.0
+offset_right = 127.0
+offset_bottom = 627.0
+theme_override_font_sizes/font_size = 20
+text = "	EXIT"

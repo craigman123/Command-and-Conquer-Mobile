@@ -1,6 +1,23 @@
 class_name VehicleBase
 extends CharacterBody3D
 
+@export_group("Health Bar")
+@export var health_bar_width := 2.0
+@export var health_bar_height := 0.18
+@export var health_bar_offset := Vector3(0.0, 3.2, 0.0)   # above the vehicle
+
+var _hp_root: Node3D
+var _hp_bg: MeshInstance3D
+var _hp_fill: MeshInstance3D
+var _hp_fill_mesh: QuadMesh
+var _hp_fill_mat: StandardMaterial3D
+
+@export_group("Crippled")
+@export var crippled_threshold := 0.25
+@export var cripple_factor := 0.5
+@export var crippled := true
+var _smoke: GPUParticles3D
+
 @export_group("Driving")
 var driver: Node = null
 
@@ -70,6 +87,10 @@ var _idle_tw: Tween
 @export var sink_depth := 3.5     	  		  # how far down it goes (a bit more than the vehicle's height)
 @export var ai_chase := true                  # enemy hunts player units on its own
 @export var chase_only_if_attacked := false   # true = stays put until it is shot at
+@export var armor := 1.0
+@export var accuracy := 0.99                  # chance to hit when healthy (0..1)
+@export var cripple_accuracy_factor := 0.5    # accuracy multiplier when crippled
+@export var miss_spread := 1.5
 
 var provoked := false
 var burst_left := 0
@@ -78,6 +99,8 @@ var health := 0.0
 var combat_target: Node3D = null
 var fire_cooldown := 0.0
 var scan_timer := 0.0
+var forced_target: Node3D = null
+var _attack_overlay: StandardMaterial3D
 
 @export_group("Dust")
 @export var dust_enabled := true
@@ -162,6 +185,10 @@ func _ready():
 	add_to_group("units")
 	add_to_group("vehicles")
 	add_to_group("player_units" if faction == GameState.player_faction else "enemy_units")
+	_attack_overlay = StandardMaterial3D.new()
+	_attack_overlay.albedo_color = Color(1, 0, 0, 0.45)
+	_attack_overlay.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	_attack_overlay.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	
 	for c in get_children():
 		if c.has_method("drive"):
@@ -170,6 +197,7 @@ func _ready():
 			break
 			
 	set_selected(false)
+	_setup_health_bar()
 	
 	if dust_enabled:
 		_setup_dust()
@@ -202,6 +230,21 @@ func _ready():
 func _warm_vfx():
 	CombatVFX.warm_up(self)
 
+func set_attack_target(on: bool):
+	if dead:
+		return   # don't wipe the burnt overlay from _die()
+	for m in find_children("*", "MeshInstance3D", true, false):
+		if m == ring or ring.is_ancestor_of(m) or (_hp_root and _hp_root.is_ancestor_of(m)):
+			continue
+		m.material_overlay = _attack_overlay if on else null
+
+
+func attack_target(enemy: Node3D):
+	if dead:
+		return
+	forced_target = enemy
+	combat_target = enemy
+	_repath_timer = 0.0
 
 func _find_model() -> Node3D:
 	for c in get_children():
@@ -213,6 +256,9 @@ func _find_model() -> Node3D:
 func set_selected(value: bool):
 	if ring:
 		ring.visible = value
+	if _hp_root:
+		_hp_root.visible = value and not dead
+		_update_health_bar()
 
 
 func move_to(pos: Vector3):
@@ -243,6 +289,7 @@ func _physics_process(delta):
 		velocity.y -= 20.0 * delta
 
 	_update_target()
+	_update_health_bar()
 	_update_force(delta)
 	_drive(delta) 
 	_update_combat(delta)
@@ -256,23 +303,30 @@ func _physics_process(delta):
 func take_damage(amount: float):
 	if dead:
 		return
-	health -= amount
+	health -= amount * armor
 	CombatVFX.impact(self, global_position + Vector3.UP * 1.0)
 	if health <= 0.0:
 		_die()
+	else:
+		_update_crippled()
 
 func _update_combat(delta: float):
-	fire_cooldown = maxf(fire_cooldown - delta, -fire_interval)
+	fire_cooldown = maxf(fire_cooldown - delta, 0.0)
 	scan_timer -= delta
 
 	if scan_timer <= 0.0:
 		scan_timer = 0.5
-		if not is_instance_valid(combat_target) or combat_target.dead \
+		if is_instance_valid(forced_target) and not forced_target.dead:
+			combat_target = forced_target          # ordered target wins over auto-targeting
+		elif not is_instance_valid(combat_target) or combat_target.dead \
 		or global_position.distance_to(combat_target.global_position) > vision_range:
+			forced_target = null
 			combat_target = _find_enemy()
 
 	if not is_instance_valid(combat_target) or combat_target.dead:
 		burst_left = 0
+		# a kill costs a short re-aim beat before the next shot
+		fire_cooldown = maxf(fire_cooldown, fire_interval * 0.5)
 		# enemy AI: the target just died, so stop heading for its wreck and settle down
 		if combat_target != null and is_instance_valid(combat_target) and combat_target.dead \
 				and is_in_group("enemy_units") and ai_chase:
@@ -285,16 +339,22 @@ func _update_combat(delta: float):
 	if dist <= attack_range and fire_cooldown <= 0.0:
 		if burst_left <= 0:
 			burst_left = burst_size
-		_play_gun()                      # sound once per bullet
+		_play_gun()
 		burst_left -= 1
-		fire_cooldown += fire_interval if burst_left <= 0 else burst_delay
+		fire_cooldown = get_fire_interval() if burst_left <= 0 else burst_delay
 
 		var muzzle := _muzzle_position()
-		print(name, " muzzle_marker=", muzzle_marker, " offset=", muzzle - global_position)
 		var hit_pos := combat_target.global_position + Vector3.UP * 1.0
+		var hit := randf() <= get_accuracy()
+		if not hit:
+			# the shot goes wide: random offset around the target
+			var off := Vector3(randf_range(-1.0, 1.0), randf_range(-0.3, 1.0), randf_range(-1.0, 1.0))
+			hit_pos += off.normalized() * randf_range(miss_spread * 0.5, miss_spread)
+
 		CombatVFX.muzzle_flash(self, muzzle, (hit_pos - muzzle).normalized())
 		CombatVFX.tracer(self, muzzle, hit_pos)
-		combat_target.take_damage(attack_damage)
+		if hit:
+			combat_target.take_damage(get_damage())
 
 	if is_in_group("enemy_units") and ai_chase and (provoked or not chase_only_if_attacked):
 		# pick this vehicle's approach angle once per target
@@ -315,6 +375,17 @@ func _update_combat(delta: float):
 				_last_goal = goal
 				move_to(goal)
 		elif dist < attack_range * 0.85:
+			_stop_near()
+
+	if forced_target != null and combat_target == forced_target and not is_in_group("enemy_units"):
+		_repath_timer -= delta
+		if dist > attack_range * 0.9:
+			if _repath_timer <= 0.0:
+				_repath_timer = repath_interval
+				var back := global_position - combat_target.global_position
+				back.y = 0.0
+				move_to(combat_target.global_position + back.normalized() * attack_range * 0.7)
+		elif dist < attack_range * 0.8:
 			_stop_near()
 			
 func _muzzle_position() -> Vector3:
@@ -895,6 +966,8 @@ func _die():
 	tw.tween_callback(queue_free)
 
 func _char_meshes(n: Node, mat: Material):
+	if n == _hp_root:
+		return
 	if n is MeshInstance3D:
 		n.material_overlay = mat
 	for c in n.get_children():
@@ -1036,3 +1109,75 @@ func _apply_sound_distance() -> void:
 	elif _sound_was_blocked and engine_state == EngineState.RUNNING:
 		_idle_fade(engine_volume_db, 0.4)     # back in range: bring the engine loop back
 	_sound_was_blocked = blocked
+	
+func _update_crippled():
+	var now := health <= max_health * crippled_threshold and health > 0.0
+	if now == crippled:
+		return
+	crippled = now
+	for m in find_children("*", "MeshInstance3D", true, false):
+		if _hp_root and _hp_root.is_ancestor_of(m):
+			continue
+		m.material_overlay = CombatVFX.damaged_material() if crippled else null
+	if crippled:
+		_smoke = CombatVFX.damaged_smoke(self, global_position + Vector3.UP * 1.0)
+	elif _smoke:
+		_smoke.queue_free()
+		_smoke = null
+		
+func _make_bar_quad(color: Color, priority: int) -> Array:
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.albedo_color = color
+	mat.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
+	mat.no_depth_test = true          # visible through the unit's own model
+	mat.render_priority = priority
+	var quad := QuadMesh.new()
+	quad.size = Vector2(health_bar_width, health_bar_height)
+	quad.material = mat
+	var mi := MeshInstance3D.new()
+	mi.mesh = quad
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	_hp_root.add_child(mi)
+	return [mi, quad, mat]
+
+func _setup_health_bar():
+	_hp_root = Node3D.new()
+	_hp_root.position = health_bar_offset
+	_hp_root.visible = false
+	add_child(_hp_root)
+
+	var bg := _make_bar_quad(Color(0.05, 0.05, 0.05, 0.85), 10)
+	_hp_bg = bg[0]
+	var bg_mat: StandardMaterial3D = bg[2]
+	bg_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	(bg[1] as QuadMesh).size = Vector2(health_bar_width + 0.1, health_bar_height + 0.08)
+
+	var fill := _make_bar_quad(Color.GREEN, 11)
+	_hp_fill = fill[0]
+	_hp_fill_mesh = fill[1]
+	_hp_fill_mat = fill[2]
+
+func _update_health_bar():
+	if _hp_root == null or not _hp_root.visible:
+		return
+	var ratio := clampf(health / max_health, 0.0, 1.0)
+	# shrink the quad from the right and shift it so the left edge stays fixed
+	var w := health_bar_width * ratio
+	_hp_fill_mesh.size = Vector2(maxf(w, 0.001), health_bar_height)
+	_hp_fill_mesh.center_offset = Vector3(-health_bar_width * 0.5 + w * 0.5, 0.0, 0.0)
+	# green -> yellow -> red
+	_hp_fill_mat.albedo_color = Color.RED.lerp(Color.GREEN, ratio) if ratio < 0.5 \
+		else Color.YELLOW.lerp(Color.GREEN, (ratio - 0.5) * 2.0)
+
+func get_speed() -> float:
+	return speed * (cripple_factor if crippled else 1.0)
+
+func get_fire_interval() -> float:
+	return fire_interval / (cripple_factor if crippled else 1.0)
+
+func get_damage() -> float:
+	return attack_damage * (cripple_factor if crippled else 1.0)
+
+func get_accuracy() -> float:
+	return accuracy * (cripple_accuracy_factor if crippled else 1.0)

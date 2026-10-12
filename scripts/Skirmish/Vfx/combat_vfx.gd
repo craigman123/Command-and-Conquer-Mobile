@@ -14,6 +14,7 @@ static var _tracer_mesh: BoxMesh
 static var _burnt: StandardMaterial3D
 static var _crater_mesh: PlaneMesh
 static var _craters: Array = []
+static var _damaged: StandardMaterial3D
 const MAX_CRATERS := 20
 
 
@@ -50,6 +51,31 @@ static func _setup_defs():
 			c0 = Color(0.15, 0.15, 0.15, 0.7), c1 = Color(0.4, 0.4, 0.4, 0.0),
 			speed = Vector2(0.5, 1.2), size = Vector2(1.5, 2.5), grow = 2.0,
 			gravity = Vector3(0, 1.0, 0), dir = Vector3.UP, spread = 20.0, additive = false},
+			
+		"tank_muzzle": {amount = 14, life = 0.25,
+			c0 = Color(1, 0.95, 0.6, 1), c1 = Color(1, 0.45, 0.1, 1),
+			speed = Vector2(6, 14), size = Vector2(0.8, 1.6), grow = 0.3,
+			gravity = Vector3.ZERO, dir = Vector3(0, 0, -1), spread = 18.0, additive = true},
+		"tank_muzzle_smoke": {amount = 18, life = 1.6,
+			c0 = Color(0.5, 0.5, 0.5, 0.6), c1 = Color(0.6, 0.6, 0.6, 0.0),
+			speed = Vector2(2, 5), size = Vector2(1.0, 2.0), grow = 3.0,
+			gravity = Vector3(0, 0.6, 0), dir = Vector3(0, 0, -1), spread = 30.0, additive = false},
+		"tank_blast_fire": {amount = 30, life = 0.7,
+			c0 = Color(1, 0.9, 0.5, 1), c1 = Color(0.9, 0.3, 0.08, 1),
+			speed = Vector2(4, 10), size = Vector2(1.5, 3.0), grow = 2.0,
+			gravity = Vector3(0, 1.0, 0), dir = Vector3.UP, spread = 180.0, additive = true},
+		"tank_blast_smoke": {amount = 30, life = 2.5,
+			c0 = Color(0.25, 0.25, 0.25, 0.7), c1 = Color(0.4, 0.4, 0.4, 0.0),
+			speed = Vector2(1, 4), size = Vector2(2.0, 4.0), grow = 3.0,
+			gravity = Vector3(0, 1.2, 0), dir = Vector3.UP, spread = 60.0, additive = false},
+		"tank_blast_dirt": {amount = 24, life = 1.2,
+			c0 = Color(0.7, 0.6, 0.4, 0.8), c1 = Color(0.7, 0.6, 0.4, 0.0),
+			speed = Vector2(5, 12), size = Vector2(0.5, 1.2), grow = 1.5,
+			gravity = Vector3(0, -6, 0), dir = Vector3.UP, spread = 45.0, additive = false},
+		"damaged_smoke": {amount = 6, life = 2.0, continuous = true,
+			c0 = Color(0.1, 0.1, 0.1, 0.4), c1 = Color(0.3, 0.3, 0.3, 0.0),
+			speed = Vector2(0.3, 0.8), size = Vector2(0.8, 1.4), grow = 2.0,
+			gravity = Vector3(0, 0.8, 0), dir = Vector3.UP, spread = 20.0, additive = false},
 	}
 
 
@@ -277,6 +303,7 @@ static func tracer(ctx: Node, from: Vector3, to: Vector3):
 		_tracer_mesh.material = mat
 	var mi := MeshInstance3D.new()
 	mi.mesh = _tracer_mesh
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	_root(ctx).add_child(mi)
 	mi.global_position = from
 	mi.look_at(to, Vector3.UP)
@@ -284,6 +311,18 @@ static func tracer(ctx: Node, from: Vector3, to: Vector3):
 	tw.tween_property(mi, "global_position", to, dist / 150.0)
 	tw.tween_callback(mi.queue_free)
 
+static func tank_muzzle(ctx: Node, pos: Vector3, dir: Vector3):
+	_play(ctx, "tank_muzzle", pos, dir)
+	_play(ctx, "tank_muzzle_smoke", pos, dir)
+	_flash(ctx, pos, Color(1, 0.7, 0.3), 6.0, 12.0, 0.15)
+
+
+static func tank_impact(ctx: Node, pos: Vector3):
+	_play(ctx, "tank_blast_fire", pos)
+	_play(ctx, "tank_blast_smoke", pos + Vector3.UP * 0.5)
+	_play(ctx, "tank_blast_dirt", pos)
+	_flash(ctx, pos + Vector3.UP, Color(1, 0.6, 0.2), 10.0, 18.0, 0.35)
+	crater(ctx, pos, randf_range(2.0, 3.0), 6.0)
 
 static func impact(ctx: Node, pos: Vector3):
 	_play(ctx, "impact_sparks", pos)
@@ -359,3 +398,17 @@ static func warm_up(ctx: Node):
 			ps.queue_free()
 		else:
 			_release(it[0], ps)
+
+static func damaged_material() -> StandardMaterial3D:
+	if _damaged == null:
+		_damaged = StandardMaterial3D.new()
+		_damaged.albedo_color = Color(0.05, 0.045, 0.04, 0.4)
+		_damaged.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	return _damaged
+
+static func damaged_smoke(vehicle: Node3D, pos: Vector3) -> GPUParticles3D:
+	var ps := _make_node("damaged_smoke", false)
+	vehicle.add_child(ps)
+	ps.global_position = pos
+	ps.emitting = true
+	return ps
