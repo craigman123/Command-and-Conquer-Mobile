@@ -3,7 +3,7 @@ extends VehicleBase
 @export_group("Bone Turret")
 @export var skeleton: Skeleton3D
 @export var bone_name := "Turret_07"
-@export var turret_turn_speed := 2.5        # radians per second
+@export var turret_turn_speed := 1.0        # radians per second
 @export var yaw_offset := 0.0               # if it aims 90/180 off, try PI/2, -PI/2 or PI
 @export var rotation_axis := Vector3.UP     # the bone's local axis that swings the turret
 @export var scan_range := 30.0
@@ -12,6 +12,8 @@ extends VehicleBase
 @export var muzzle_offset := Vector3.ZERO   # nudge in the bone's local space if the flash is off the tip
 @export var muzzle_node: Node3D
 
+var _turret_world := 0.0
+var _turret_ready := false
 var _muzzle_bone := -1
 var _bone := -1
 var _rest: Quaternion
@@ -22,13 +24,15 @@ var _swing_axis := Vector3.UP
 
 # ---------- TANK SETTINGS ----------
 const TANK_FACTION := "heroes"
-const TANK_HEALTH := 150.0
-const TANK_DAMAGE := 25.0
+const TANK_HEALTH := 100.0
+const TANK_DAMAGE := 20.0
 const TANK_RANGE := 25.0
-const TANK_FIRE_INTERVAL := 3.0
+const TANK_FIRE_INTERVAL := 2.0
 const TANK_SPEED := 5.0
 const TANK_ARMOR := 0.8
 const TANK_BURST_SIZE := 1
+const CAN_ATTACK = true
+const FORCED_TARGET = true
 
 const TANK_SMOKE_OFFSET := Vector3(0.0, 0.7, 2.3)
 const TANK_DUST_OFFSET := Vector3(0.0, 0.3, 2.5)
@@ -39,7 +43,7 @@ const TANK_DUST_LIFETIME := 0.5
 const MUZZLE_HEIGHT := 1.4
 const MUZZLE_FORWARD := 1.2
 
-const IDLE_PITCH := 6.0
+const IDLE_PITCH := 0.6
 const GUN_VOLUME_DB := 17.0
 const MAX_PITCH := 1.0
 
@@ -56,6 +60,7 @@ func _init():
 	speed = TANK_SPEED
 	armor = TANK_ARMOR
 	burst_size = TANK_BURST_SIZE
+	can_attack = CAN_ATTACK
 
 	smoke_offset = TANK_SMOKE_OFFSET
 	smoke_max_amount = TANK_SMOKE_AMOUNT
@@ -107,9 +112,19 @@ func _physics_process(delta: float) -> void:
 	_update_turret(delta)
 
 
+func _body_yaw() -> float:
+	var f := global_transform.basis.orthonormalized() * Vector3(0, 0, -1)
+	return atan2(-f.x, -f.z)
+
+
 func _update_turret(delta: float) -> void:
 	if dead or _bone == -1:
 		return
+
+	var body_yaw := _body_yaw()
+	if not _turret_ready:
+		_turret_world = body_yaw
+		_turret_ready = true
 
 	var t: VehicleBase = combat_target as VehicleBase
 	if not is_instance_valid(t) or t.dead:
@@ -119,24 +134,21 @@ func _update_turret(delta: float) -> void:
 			_scan_target = _find_far_enemy()
 		t = _scan_target
 
-	var desired := 0.0
-	var tracking: bool = is_instance_valid(t) and not t.dead
-	if tracking:
-		var local := global_transform.basis.orthonormalized().inverse() * (t.global_position - global_position)
-		local.y = 0.0
-		if local.length() > 0.1:
-			desired = atan2(-local.x, -local.z) + yaw_offset
-		else:
-			tracking = false
-	if not tracking:
-		if not return_to_rest:
-			return
-		desired = 0.0
+	var desired := _turret_world
+	if is_instance_valid(t) and not t.dead:
+		var d := t.global_position - global_position
+		d.y = 0.0
+		if d.length() > 0.1:
+			desired = atan2(-d.x, -d.z) + yaw_offset
+	elif return_to_rest:
+		desired = body_yaw
 
-	var diff := angle_difference(_turret_angle, desired)
+	var diff := angle_difference(_turret_world, desired)
 	var step := turret_turn_speed * delta
-	_turret_angle += clampf(diff, -step, step)
-	skeleton.set_bone_pose_rotation(_bone, _rest * Quaternion(_swing_axis, _turret_angle))
+	_turret_world += clampf(diff, -step, step)
+
+	var relative := angle_difference(body_yaw, _turret_world)
+	skeleton.set_bone_pose_rotation(_bone, _rest * Quaternion(_swing_axis, relative))
 
 func _find_far_enemy() -> VehicleBase:
 	var best: VehicleBase = null

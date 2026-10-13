@@ -1,7 +1,7 @@
 extends DirectionalLight3D
 
 # ---------- SHADOW SETTINGS (true = casts a shadow, false = no shadow) ----------
-@export var sun_shadows := true      # master switch: false turns ALL shadows off
+@export var sun_shadows := false      # master switch: false turns ALL shadows off
 
 @export var trees_shadow := false
 @export var flora_shadow := false    # grass, bushes, cactus

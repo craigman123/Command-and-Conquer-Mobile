@@ -1,5 +1,15 @@
 class_name VehicleBase
 extends CharacterBody3D
+signal died(vehicle)
+
+@export_group("Blob Shadow")
+@export var blob_shadow_size := Vector2(1.0, 5.0)   # width x length
+@export var blob_shadow_opacity := 0.6
+static var _sun: DirectionalLight3D
+static var _blob_mat: StandardMaterial3D
+
+var _blob: Node3D
+static var _blob_tex: GradientTexture2D
 
 @export_group("Health Bar")
 @export var health_bar_width := 2.0
@@ -15,11 +25,18 @@ var _hp_fill_mat: StandardMaterial3D
 @export_group("Crippled")
 @export var crippled_threshold := 0.25
 @export var cripple_factor := 0.5
-@export var crippled := true
+@export var crippled := false
 var _smoke: GPUParticles3D
 
 @export_group("Driving")
 var driver: Node = null
+
+static var _paths_frame := -1
+static var _paths_this_frame := 0
+const MAX_PATHS_PER_FRAME := 3
+
+var _pending_dest := Vector3.ZERO
+var _has_pending := false
 
 @export_group("Encircle")
 @export var encircle_spread := 70.0        # degrees to each side of the approach direction
@@ -91,7 +108,10 @@ var _idle_tw: Tween
 @export var accuracy := 0.99                  # chance to hit when healthy (0..1)
 @export var cripple_accuracy_factor := 0.5    # accuracy multiplier when crippled
 @export var miss_spread := 1.5
+@export var unarmed_penalty := 15.0   # unarmed units (the convoy) look this much farther away
+@export var stick_bonus := 5.0 
 
+static var _tracer_free: Array = []
 var provoked := false
 var burst_left := 0
 var dead := false
@@ -102,8 +122,12 @@ var scan_timer := 0.0
 var forced_target: Node3D = null
 var _attack_overlay: StandardMaterial3D
 
+@export_group("Mission")
+@export var mission_critical := false  		  # losing this unit = game over
+@export var can_attack := false          	  # false for unarmed lab trucks
+
 @export_group("Dust")
-@export var dust_enabled := true
+@export var dust_enabled := false
 @export var dust_offset := Vector3(0.0, 0.3, -2.0)  
 @export var dust_max_amount := 24        
 @export var dust_min_speed := 2.0
@@ -111,6 +135,9 @@ var _attack_overlay: StandardMaterial3D
 @export var terrain_dust: Dictionary = {}
 @export var dust_lifetime = 0.5
 
+static var _puff_quad: QuadMesh
+var _dust_probe_timer := 0.0
+var _dust_target := Color(0, 0, 0, 0)
 var dust: GPUParticles3D
 var dust_pm: ParticleProcessMaterial
 var dust_color := Color(0.8, 0.7, 0.5, 0.55)
@@ -133,7 +160,7 @@ var stuck_cooldown := 0.0
 @export var model: Node3D
 @export var tilt_speed := 8.0
 @export var max_tilt_degrees := 40.0
-@export var smoke_enabled := true
+@export var smoke_enabled := false
 @export var smoke_offset := Vector3(0.0, 0.7, -2.3)
 @export var smoke_max_amount := 40
 
@@ -142,6 +169,7 @@ var stuck_cooldown := 0.0
 @export var force_stuck_radius := 1.5
 @export var force_max_time := 3.0
 @export var force_escape_distance := 3.0
+@export var max_climb_degrees := 65.0
 
 var force_active := false
 var force_dir := 1.0        
@@ -176,15 +204,19 @@ var last_pos := Vector3.ZERO
 
 var smoke: GPUParticles3D
 var model_base_basis := Basis.IDENTITY
+var ring_base_basis := Basis.IDENTITY
 var ground_normal := Vector3.UP
 
 func _ready():
-	print(name, " faction=", faction, " player=", GameState.player_faction)
 	health = max_health
+	scan_timer = randf() * 0.5
+	_repath_timer = randf() * repath_interval
 	_slot = float(get_instance_id() % 1000) / 500.0 - 1.0
 	add_to_group("units")
 	add_to_group("vehicles")
 	add_to_group("player_units" if faction == GameState.player_faction else "enemy_units")
+	if mission_critical:
+		add_to_group("mission_critical")
 	_attack_overlay = StandardMaterial3D.new()
 	_attack_overlay.albedo_color = Color(1, 0, 0, 0.45)
 	_attack_overlay.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
@@ -207,6 +239,9 @@ func _ready():
 	if model:
 		model_base_basis = model.basis
 		
+	if ring:
+		ring_base_basis = ring.basis
+		
 	if muzzle_marker == null:
 		muzzle_marker = find_child("Muzzle", true, false) as Node3D
 		
@@ -218,6 +253,10 @@ func _ready():
 
 	if smoke_enabled:
 		_setup_smoke()
+		
+	_setup_blob_shadow()
+	set_blob_shadow(not GameState.real_shadows)
+	_apply_sun_shadow()
 
 	await get_tree().physics_frame
 	await get_tree().physics_frame
@@ -248,7 +287,9 @@ func attack_target(enemy: Node3D):
 
 func _find_model() -> Node3D:
 	for c in get_children():
-		if c is Node3D and not (c is CollisionShape3D) and c != ring and c != agent and not (c is GPUParticles3D):
+		if c is Node3D and not (c is CollisionShape3D) and c != ring and c != agent \
+				and not (c is GPUParticles3D) and not (c is CPUParticles3D) \
+				and c != _blob and c != _hp_root:
 			return c
 	return null
 
@@ -268,9 +309,28 @@ func move_to(pos: Vector3):
 		driver.on_new_order()
 	if not nav_ready:
 		return
+	if _has_pending and _pending_dest.distance_to(pos) < 1.5:
+		return
+	_pending_dest = pos
+	_has_pending = true
+	path_index = 0
+	reversing = false
+	_reset_force()
+
+func _process_pending_path():
+	if not _has_pending:
+		return
+	var f := Engine.get_process_frames()
+	if _paths_frame != f:
+		_paths_frame = f
+		_paths_this_frame = 0
+	if _paths_this_frame >= MAX_PATHS_PER_FRAME:
+		return                      # try again next frame
+	_paths_this_frame += 1
+	_has_pending = false
 	var map := agent.get_navigation_map()
-	var closest := NavigationServer3D.map_get_closest_point(map, pos)
-	path = NavigationServer3D.map_get_path(map, global_position, closest, true)
+	var closest := NavigationServer3D.map_get_closest_point(map, _pending_dest)
+	path = NavigationServer3D.map_get_path(map, global_position, closest, true, agent.navigation_layers)
 	path_index = 0
 	reversing = false
 	_reset_force()
@@ -281,6 +341,8 @@ func _forward() -> Vector3:
 	f.y = 0.0
 	return f.normalized()
 
+func _process(_delta):
+	_process_pending_path()
 
 func _physics_process(delta):
 	if is_on_floor():
@@ -289,7 +351,6 @@ func _physics_process(delta):
 		velocity.y -= 20.0 * delta
 
 	_update_target()
-	_update_health_bar()
 	_update_force(delta)
 	_drive(delta) 
 	_update_combat(delta)
@@ -305,23 +366,27 @@ func take_damage(amount: float):
 		return
 	health -= amount * armor
 	CombatVFX.impact(self, global_position + Vector3.UP * 1.0)
+	_update_health_bar()
 	if health <= 0.0:
 		_die()
 	else:
 		_update_crippled()
 
 func _update_combat(delta: float):
+	if not can_attack:
+		combat_target = null
+		forced_target = null
+		return
 	fire_cooldown = maxf(fire_cooldown - delta, 0.0)
 	scan_timer -= delta
 
 	if scan_timer <= 0.0:
-		scan_timer = 0.5
+		scan_timer = 0.5 * _lod_step()
 		if is_instance_valid(forced_target) and not forced_target.dead:
-			combat_target = forced_target          # ordered target wins over auto-targeting
-		elif not is_instance_valid(combat_target) or combat_target.dead \
-		or global_position.distance_to(combat_target.global_position) > vision_range:
+			combat_target = forced_target          # an ordered target still wins
+		else:
 			forced_target = null
-			combat_target = _find_enemy()
+			combat_target = _find_enemy()          # re-pick the best target every scan
 
 	if not is_instance_valid(combat_target) or combat_target.dead:
 		burst_left = 0
@@ -400,13 +465,21 @@ func _encircle_goal() -> Vector3:
 
 func _find_enemy() -> Node3D:
 	var best: Node3D = null
-	var best_dist := vision_range
-	for u in get_tree().get_nodes_in_group("units"):
-		if u == self or u.faction == faction:
+	var best_score := INF
+	var enemy_group := "enemy_units" if is_in_group("player_units") else "player_units"
+	var vr2 := vision_range * vision_range
+	var my_pos := global_position
+	for u in get_tree().get_nodes_in_group(enemy_group):
+		var d2 := my_pos.distance_squared_to(u.global_position)
+		if d2 > vr2:
 			continue
-		var d := global_position.distance_to(u.global_position)
-		if d < best_dist:
-			best_dist = d
+		var score := sqrt(d2)
+		if u.get("can_attack") == false:
+			score += unarmed_penalty
+		if u == combat_target:
+			score -= stick_bonus
+		if score < best_score:
+			best_score = score
 			best = u
 	return best
 
@@ -497,6 +570,9 @@ func _insert_detour():
 	var point := global_position + move_dir * (detour_forward * 1.5) + left * side * (detour_side * 0.5)
 	point = NavigationServer3D.map_get_closest_point(agent.get_navigation_map(), point)
 	path.insert(path_index, point)
+	
+func _is_walkable(normal: Vector3) -> bool:
+	return normal.y >= cos(floor_max_angle) - 0.02
 
 
 # +1 if the left side has more room, -1 if the right does (two diagonal rays)
@@ -511,7 +587,7 @@ func _freer_side(move_dir: Vector3) -> float:
 		var q := PhysicsRayQueryParameters3D.create(origin, origin + dirs[i] * max_len)
 		q.exclude = [get_rid()]
 		var hit := space.intersect_ray(q)
-		if not hit.is_empty() and hit.normal.y <= 0.7:
+		if not hit.is_empty() and not _is_walkable(hit.normal):
 			room[i] = origin.distance_to(hit.position)
 	if is_equal_approx(room[0], room[1]):
 		return avoid_side if avoid_side != 0.0 else -1.0
@@ -536,6 +612,7 @@ func _stop_near():
 	path = PackedVector3Array()
 	path_index = 0
 	reversing = false
+	_has_pending = false
 	avoid_commit = 0.0
 
 
@@ -567,7 +644,7 @@ func _avoid_obstacles() -> Array:
 		var q := PhysicsRayQueryParameters3D.create(origin, origin + dirs[i] * lengths[i])
 		q.exclude = [get_rid()]
 		var hit := space.intersect_ray(q)
-		if hit.is_empty() or hit.normal.y > 0.7:
+		if hit.is_empty() or _is_walkable(hit.normal):
 			continue
 		var d: float = 1.0 - origin.distance_to(hit.position) / lengths[i]
 		var root: Node3D = null
@@ -654,6 +731,8 @@ func _update_tilt(delta: float):
 	b.x = local_normal.cross(Vector3.BACK).normalized()
 	b.z = b.x.cross(b.y).normalized()
 	model.basis = b * model_base_basis
+	if ring:
+		ring.basis = b * ring_base_basis
 
 func _update_smoke():
 	if smoke == null:
@@ -809,36 +888,30 @@ func _setup_dust():
 	dust = GPUParticles3D.new()
 	dust.position = dust_offset
 	dust.amount = dust_max_amount
-	dust.lifetime = dust_lifetime if dust_lifetime != null and dust_lifetime > 0.0 else 2.0
+	dust.lifetime = dust_lifetime if dust_lifetime > 0.0 else 2.0
 	dust.local_coords = false
 	dust.emitting = false
-	dust.visibility_aabb = AABB(Vector3(-30, -5, -30), Vector3(60, 20, 60))
-	
-	dust.randomness = 1.0        # spreads particle spawn times so they don't come in clumps
+	dust.randomness = 1.0
 	dust.explosiveness = 0.0
-	dust.fixed_fps = 0           # smooth, not stepped
+	dust.fixed_fps = 0
 	dust.interpolate = true
+	dust.visibility_aabb = AABB(Vector3(-30, -5, -30), Vector3(60, 20, 60))
 
 	dust_pm = ParticleProcessMaterial.new()
 	dust_pm.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_BOX
-	dust_pm.emission_box_extents = Vector3(0.9, 0.05, 0.3)   # wide: one puff per rear wheel
+	dust_pm.emission_box_extents = Vector3(1.1, 0.1, 0.6)
 	dust_pm.direction = Vector3(0, 0.3, 0)
 	dust_pm.spread = 40.0
-	dust_pm.initial_velocity_min = 0.5
-	dust_pm.initial_velocity_max = 1.5
+	dust_pm.initial_velocity_min = 0.3
+	dust_pm.initial_velocity_max = 1.2
 	dust_pm.gravity = Vector3(0, 0.3, 0)
 	dust_pm.damping_min = 0.8
 	dust_pm.damping_max = 1.5
-	dust_pm.scale_min = 0.7
-	dust_pm.scale_max = 1.2
-	dust_pm.color = dust_color
-	dust_pm.angle_min = -180.0
-	dust_pm.angle_max = 180.0
 	dust_pm.scale_min = 1.8
 	dust_pm.scale_max = 3.2
-	dust_pm.initial_velocity_min = 0.3     
-	dust_pm.initial_velocity_max = 1.2
-	dust_pm.emission_box_extents = Vector3(1.1, 0.1, 0.6)
+	dust_pm.angle_min = -180.0
+	dust_pm.angle_max = 180.0
+	dust_pm.color = dust_color
 
 	var sc := Curve.new()
 	sc.add_point(Vector2(0.0, 0.5))
@@ -848,53 +921,29 @@ func _setup_dust():
 	dust_pm.scale_curve = sct
 
 	var g := Gradient.new()
-	g.offsets = PackedFloat32Array([0.0, 0.25, 1.0])
-	g.colors = PackedColorArray([Color(1, 1, 1, 0.0), Color(1, 1, 1, 1.0), Color(1, 1, 1, 0.0)])
+	g.offsets = PackedFloat32Array([0.0, 0.2, 0.7, 1.0])
+	g.colors = PackedColorArray([
+		Color(1, 1, 1, 0.0), Color(1, 1, 1, 0.8),
+		Color(1, 1, 1, 0.4), Color(1, 1, 1, 0.0)])
 	var gt := GradientTexture1D.new()
 	gt.gradient = g
 	dust_pm.color_ramp = gt
 	dust.process_material = dust_pm
-	
-	var pg := Gradient.new()
-	pg.offsets = PackedFloat32Array([0.0, 0.35, 0.7, 1.0])
-	pg.colors = PackedColorArray([
-		Color(1, 1, 1, 0.9),
-		Color(1, 1, 1, 0.55),
-		Color(1, 1, 1, 0.15),
-		Color(1, 1, 1, 0.0)])
-	var puff := GradientTexture2D.new()
-	puff.gradient = pg
-	puff.fill = GradientTexture2D.FILL_RADIAL
-	puff.fill_from = Vector2(0.5, 0.5)
-	puff.fill_to = Vector2(0.5, 0.0)
-	puff.width = 64
-	puff.height = 64
-	
-	g.offsets = PackedFloat32Array([0.0, 0.2, 0.7, 1.0])
-	g.colors = PackedColorArray([
-		Color(1, 1, 1, 0.0),
-		Color(1, 1, 1, 0.8),
-		Color(1, 1, 1, 0.4),
-		Color(1, 1, 1, 0.0)])
 
-	var mat := StandardMaterial3D.new()
-	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	mat.vertex_color_use_as_albedo = true
-	mat.albedo_texture = puff
-	mat.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
-	mat.billboard_keep_scale = true
-	var quad := QuadMesh.new()
-	quad.size = Vector2(1, 1)
-	quad.material = mat
-	dust.draw_pass_1 = quad
+	dust.draw_pass_1 = _shared_puff_quad()
 	add_child(dust)
-
 
 func _update_dust(delta: float):
 	if dust == null:
 		return
-	var target := _ground_dust_color()
+	if not is_visible_in_tree():
+		dust.emitting = false
+		return
+	_dust_probe_timer -= delta
+	if _dust_probe_timer <= 0.0:
+		_dust_probe_timer = 0.2 + randf() * 0.1 
+		_dust_target = _ground_dust_color()
+	var target := _dust_target
 	dust_color = dust_color.lerp(target, clampf(6.0 * delta, 0.0, 1.0))
 	dust_pm.color = dust_color
 
@@ -934,6 +983,7 @@ func _terrain_texture_id() -> int:
 	
 func _die():
 	dead = true
+	died.emit(self)
 	_stop_all_sound()
 	_play_explosion_sound()
 	for g in ["units", "vehicles", "player_units", "enemy_units"]:
@@ -1181,3 +1231,94 @@ func get_damage() -> float:
 
 func get_accuracy() -> float:
 	return accuracy * (cripple_accuracy_factor if crippled else 1.0)
+	
+func _setup_blob_shadow():
+	if _blob_tex == null:
+		var g := Gradient.new()
+		g.offsets = PackedFloat32Array([0.0, 0.6, 1.0])
+		g.colors = PackedColorArray([Color(0, 0, 0, 1), Color(0, 0, 0, 0.6), Color(0, 0, 0, 0)])
+		_blob_tex = GradientTexture2D.new()
+		_blob_tex.gradient = g
+		_blob_tex.fill = GradientTexture2D.FILL_RADIAL
+		_blob_tex.fill_from = Vector2(0.5, 0.5)
+		_blob_tex.fill_to = Vector2(0.5, 0.0)
+		_blob_tex.width = 128
+		_blob_tex.height = 128
+
+	if RenderingServer.get_current_rendering_method() == "gl_compatibility":
+		# Compatibility has no Decal support: use a flat quad on the ground instead
+		if _blob_mat == null:
+			_blob_mat = StandardMaterial3D.new()
+			_blob_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+			_blob_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+			_blob_mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+			_blob_mat.albedo_texture = _blob_tex
+			_blob_mat.albedo_color = Color(1, 1, 1, blob_shadow_opacity)
+		var quad := PlaneMesh.new()
+		quad.size = blob_shadow_size
+		quad.material = _blob_mat
+		var mi := MeshInstance3D.new()
+		mi.mesh = quad
+		mi.position = Vector3(0, 0.08, 0)
+		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		mi.visibility_range_end = 65.0
+		_blob = mi
+	else:
+		var d := Decal.new()
+		d.texture_albedo = _blob_tex
+		d.size = Vector3(blob_shadow_size.x, 1.5, blob_shadow_size.y)  # shallow box: only catches the ground
+		d.position = Vector3(0, 0.5, 0)
+		d.modulate = Color(1, 1, 1, blob_shadow_opacity)
+		d.distance_fade_enabled = true
+		d.distance_fade_begin = 50.0
+		d.distance_fade_length = 15.0
+		_blob = d
+
+	add_child(_blob)
+
+func set_blob_shadow(on: bool):
+	if _blob:
+		_blob.visible = on
+		
+func _apply_sun_shadow(): 
+	if _sun == null or not is_instance_valid(_sun):
+		_sun = get_tree().root.find_child("DirectionalLight3D", true, false) as DirectionalLight3D
+	if _sun:
+		_sun.shadow_enabled = GameState.real_shadows
+		
+# how often (in physics frames) this vehicle does its expensive work
+func _lod_step() -> int:
+	if not is_visible_in_tree():
+		return 4          # hidden: every 4th frame
+	var cam := get_viewport().get_camera_3d()
+	if cam and cam.global_position.distance_to(global_position) > 60.0:
+		return 2          # visible but far away
+	return 1              # close: full rate
+	
+static func _shared_puff_quad() -> QuadMesh:
+	if _puff_quad == null:
+		var pg := Gradient.new()
+		pg.offsets = PackedFloat32Array([0.0, 0.35, 0.7, 1.0])
+		pg.colors = PackedColorArray([
+			Color(1, 1, 1, 0.9), Color(1, 1, 1, 0.55),
+			Color(1, 1, 1, 0.15), Color(1, 1, 1, 0.0)])
+		var puff := GradientTexture2D.new()
+		puff.gradient = pg
+		puff.fill = GradientTexture2D.FILL_RADIAL
+		puff.fill_from = Vector2(0.5, 0.5)
+		puff.fill_to = Vector2(0.5, 0.0)
+		puff.width = 64
+		puff.height = 64
+
+		var mat := StandardMaterial3D.new()
+		mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		mat.vertex_color_use_as_albedo = true
+		mat.albedo_texture = puff
+		mat.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
+		mat.billboard_keep_scale = true
+
+		_puff_quad = QuadMesh.new()
+		_puff_quad.size = Vector2(1, 1)
+		_puff_quad.material = mat
+	return _puff_quad

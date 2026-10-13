@@ -39,6 +39,8 @@ var tp_forward := true
 var tp_turned := 0.0
 var tp_hold := 0.0
 var last_yaw := 0.0
+var _avoid_cache = [0.0, 1.0, 0.0]
+var _avoid_acc := 999.0
 
 var _man_time := 0.0        # how long the current manoeuvre has been running
 var _shuffles := 0
@@ -228,13 +230,17 @@ func drive(delta: float):
 			target_speed = clampf(target_speed, -cap, cap)
 
 		if mode != Mode.THREE_POINT:
-			var avoid = v._avoid_obstacles()
+			if (Engine.get_physics_frames() + v.get_instance_id()) % v._lod_step() == 0:
+				_avoid_cache = v._avoid_obstacles()
+			var avoid = _avoid_cache
 			avoid_steer = avoid[0]
 			avoid_speed = avoid[1]
 			avoid_weight = avoid[2]
 			avoided = true
 			steer_angle = clampf(steer_angle * (1.0 - avoid_weight) + avoid_steer, -PI, PI)
 			target_speed *= avoid_speed
+		else:
+			v.reversing = false
 	else:
 		v.reversing = false
 		if mode != Mode.NORMAL:
@@ -503,7 +509,15 @@ func _fan(space: PhysicsDirectSpaceState3D, origin: Vector3, base: Vector3, degs
 		_query.from = origin
 		_query.to = origin + dir * reach
 		var hit := space.intersect_ray(_query)
-		if hit.is_empty() or hit.normal.y > 0.7:
+		if hit.is_empty() or v._is_walkable(hit.normal):
 			continue
 		best = minf(best, origin.distance_to(hit.position))
 	return best
+	
+func _get_avoid(delta: float) -> Array:
+	_avoid_acc += delta
+	if _avoid_acc >= 0.06:
+		v._avoid_dt = _avoid_acc
+		_avoid_acc = randf() * 0.02     # de-sync units
+		_avoid_cache = v._avoid_obstacles()
+	return _avoid_cache

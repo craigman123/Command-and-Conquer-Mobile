@@ -88,8 +88,6 @@ func _select_at(screen_pos: Vector2):
 		hit.collider.set_selected(true)
 
 func _command_at(screen_pos: Vector2):
-	# drop dead/freed units from the selection
-	print("RIGHT CLICK, selected=", selected.size())
 	for i in range(selected.size() - 1, -1, -1):
 		if not is_instance_valid(selected[i]) or selected[i].dead:
 			selected.remove_at(i)
@@ -119,9 +117,7 @@ func _clear_target():
 	current_target = null
 
 func _move_selected(screen_pos: Vector2):
-	print("MOVE order, selected=", selected.size())
 	var hit = _raycast(screen_pos, LAYER_WORLD)
-	print("ground hit=", hit)
 	if not hit:
 		return
 	_clear_target()
@@ -129,7 +125,8 @@ func _move_selected(screen_pos: Vector2):
 	# green marker at the clicked point
 	var marker := DestinationMarker.new()
 	get_tree().current_scene.add_child(marker)
-	marker.global_position = hit.position + Vector3(0, 0.05, 0)
+	marker.global_position = hit.position + hit.normal * 0.05
+	marker.align_to_normal(hit.normal)
 
 	var n := selected.size()
 	var cols := ceili(sqrt(n))

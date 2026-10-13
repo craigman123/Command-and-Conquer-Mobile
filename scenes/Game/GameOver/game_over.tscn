@@ -1,0 +1,40 @@
+[gd_scene format=3 uid="uid://biu3vrdgb5mpv"]
+
+[ext_resource type="Script" uid="uid://gwygvabrfn6g" path="res://scenes/Game/GameOver/game_over.gd" id="1_gurpe"]
+
+[node name="GameOver" type="CanvasLayer" unique_id=1813369387]
+script = ExtResource("1_gurpe")
+
+[node name="Label" type="Label" parent="." unique_id=1234608441]
+offset_left = 462.0
+offset_top = 180.0
+offset_right = 692.0
+offset_bottom = 235.0
+theme_override_font_sizes/font_size = 40
+text = "GAME OVER"
+
+[node name="Label2" type="Label" parent="." unique_id=534993214]
+offset_left = 319.0
+offset_top = 297.0
+offset_right = 839.0
+offset_bottom = 356.0
+theme_override_font_sizes/font_size = 20
+text = "\"Protect all of the convoys or it will release 
+the redioactive material into the air dooming you all\""
+horizontal_alignment = 1
+
+[node name="Surrender" type="Button" parent="." unique_id=1065057065]
+offset_left = 321.0
+offset_top = 477.0
+offset_right = 550.0
+offset_bottom = 540.0
+theme_override_font_sizes/font_size = 20
+text = "SURRENDER"
+
+[node name="Restart" type="Button" parent="." unique_id=1312904165]
+offset_left = 603.0
+offset_top = 477.0
+offset_right = 830.0
+offset_bottom = 540.0
+theme_override_font_sizes/font_size = 20
+text = "TRY AGAIN"

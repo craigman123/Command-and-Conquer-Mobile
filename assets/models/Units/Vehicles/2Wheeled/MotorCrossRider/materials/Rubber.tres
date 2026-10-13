@@ -1,0 +1,7 @@
+[gd_resource type="StandardMaterial3D" format=3 uid="uid://dsy2673lnmk3d"]
+
+[resource]
+resource_name = "Rubber"
+cull_mode = 2
+albedo_color = Color(0.08543899, 0.08543899, 0.08543899, 1)
+metallic = 0.6347305

@@ -4,9 +4,9 @@ extends RefCounted
 # Everything is built ONCE and reused. Nothing is created from scratch during a fight.
 
 static var warmed := false
-static var _defs := {}          # effect name -> its settings
-static var _templates := {}     # effect name -> {pm, mesh} (built once)
-static var _free := {}          # effect name -> list of idle particle nodes, ready to reuse
+static var _defs := {}          			# effect name -> its settings
+static var _templates := {}     			# effect name -> {pm, mesh} (built once)
+static var _free := {}          			# effect name -> list of idle particle nodes, ready to reuse
 static var _light: OmniLight3D
 static var _light_tw: Tween
 static var _puff: GradientTexture2D
@@ -16,6 +16,7 @@ static var _crater_mesh: PlaneMesh
 static var _craters: Array = []
 static var _damaged: StandardMaterial3D
 const MAX_CRATERS := 20
+static var _tracer_free: Array = []  
 
 
 # ---------- settings for every effect ----------
@@ -301,15 +302,22 @@ static func tracer(ctx: Node, from: Vector3, to: Vector3):
 		mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 		mat.albedo_color = Color(2.5, 1.8, 0.8)
 		_tracer_mesh.material = mat
-	var mi := MeshInstance3D.new()
-	mi.mesh = _tracer_mesh
-	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	_root(ctx).add_child(mi)
+	var mi: MeshInstance3D
+	if _tracer_free.is_empty():
+		mi = MeshInstance3D.new()
+		mi.mesh = _tracer_mesh
+		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		_root(ctx).add_child(mi)
+	else:
+		mi = _tracer_free.pop_back()
+	mi.visible = true
 	mi.global_position = from
 	mi.look_at(to, Vector3.UP)
 	var tw := mi.create_tween()
 	tw.tween_property(mi, "global_position", to, dist / 150.0)
-	tw.tween_callback(mi.queue_free)
+	tw.tween_callback(func():
+		mi.visible = false
+		_tracer_free.append(mi))
 
 static func tank_muzzle(ctx: Node, pos: Vector3, dir: Vector3):
 	_play(ctx, "tank_muzzle", pos, dir)
